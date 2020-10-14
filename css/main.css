@@ -1,0 +1,60 @@
+html, body {
+    display: flex;
+    flex-wrap: wrap;
+    height: 100%;
+    width: 100%;
+}
+
+body > * {
+    flex-shrink: 1;
+}
+
+.tool-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border-style: solid;
+    border-color: black;
+}
+
+.tool-bar > .tool {
+    min-width: 15%;
+    margin: 1rem;
+    justify-content: center;
+}
+
+.side-bar {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0rem 0rem 0rem;
+    border-style: solid;
+    border-color: black;
+    min-width: 12%;
+    height: 100%;
+    padding: 1rem;
+}
+
+.side-bar > .tool {
+    min-width: 20%;
+    margin: 0rem 0rem 1.5rem 0rem;
+    justify-content: flex-start;
+}
+
+.tool {
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.tool > i {
+    margin: 0rem 0.3rem 0rem 0rem;
+}
+
+.image {
+    display: flex;
+}
