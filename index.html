@@ -14,6 +14,13 @@
     </div>
     <div class="side-bar">
         <div class="tool-group">
+            <div id="correction" class="tool"><i class="fas fa-edit"></i>Correction</div>
+            <div class="sub-tool">
+                <label>Exposure: <input id="exposure" type="range"></label>
+                <label>Contrast: <input id="contrast" type="range"></label>
+            </div>
+        </div>
+        <div class="tool-group">
             <div id="draw_shapes" class="tool"><i class="fas fa-edit"></i>Draw Shapes</div>
             <div id="circle_tool" class="sub-tool">Circle</div>
             <div id="rectangle_tool" class="sub-tool">Rectangle</div>
@@ -30,15 +37,15 @@
         <div class="tool-group">
             <div id="sharpen_tool" class="tool"><i class="fab fa-codepen"></i>Sharpen</div>
             <div class="sub-tool">
-                <label>Radius: <input id="sharpen_radius" type="range"></label>
+                <label>Radius: <input id="sharpen_radius" 
+                    type="range"></label>
                 <label>Strength: <input id="sharpen_strength" type="range"></label>
-                
             </div>
         </div>
         <div class="tool-group">
             <div id="color_filter_tool" class="tool"><i class="fas fa-palette"></i>Color Filter</div>
             <div class="sub-tool">
-                <label>Color: <input id="color" type="color"></label>
+                <label>Color: <input id="color_picker" type="color"></label>
                 <label>Opacity: <input id="color_opacity" type="range"></label>
             </div>
         </div>
