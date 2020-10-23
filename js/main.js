@@ -43,14 +43,10 @@ function blurChanged() {
 }
 
 // Sharpen
-// Source: https://gist.github.com/mikecao/65d9fc92dc7197cb8a7c
-const sharpenRadius = document.getElementById('sharpen_radius');
+// Modified From: https://gist.github.com/mikecao/65d9fc92dc7197cb8a7c
 const sharpenStrength = document.getElementById('sharpen_strength');
-sharpenRadius.addEventListener('change', sharpenChanged);
-sharpenStrength.addEventListener('change', sharpenChanged);
-function sharpenChanged() {
+sharpenStrength.addEventListener('change', () => {
     if (!image.src) return;
-    let radius = sharpenRadius.value;
     let strength = sharpenStrength.value / 100;
     let w = image.width, h = image.height;
     let x, sx, sy, r, g, b, dstOff, srcOff, wt, cx, cy, scy, scx,
@@ -98,7 +94,7 @@ function sharpenChanged() {
     }
 
     canvasContext.putImageData(dstData, 0, 0);
-}
+});
 
 // Color Filter
 const colorPicker = document.getElementById('color_picker');
@@ -112,6 +108,10 @@ function colorChanged() {
     canvasContext.fillRect(0, 0, image.width, image.height);
     redrawImage();
 }
+
+// Clear all image modifications.
+const clearAllButton = document.getElementById('clear_all').addEventListener('click', () => {
+});
 
 // Returns Unit. By default all percentage-based unit is normalised in each tool.
 function getUnit(key) {
