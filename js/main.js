@@ -49,13 +49,14 @@ sharpenStrength.addEventListener('change', () => {
     if (!image.src) return;
     let strength = sharpenStrength.value / 100;
     let w = image.width, h = image.height;
+    let currentImageData = canvasContext.getImageData(0, 0, w, h);
     let x, sx, sy, r, g, b, dstOff, srcOff, wt, cx, cy, scy, scx,
         weights = [0, -1, 0, -1, 5, -1, 0, -1, 0],
         katet = Math.round(Math.sqrt(weights.length)),
         half = (katet * 0.5) | 0,
-        dstData = canvasContext.getImageData(0, 0, w, h),
+        dstData = currentImageData,
         dstBuff = dstData.data,
-        srcBuff = canvasContext.getImageData(0, 0, w, h).data,
+        srcBuff = currentImageData.data,
         y = h;
 
     while (y--) {
@@ -111,6 +112,7 @@ function colorChanged() {
 
 // Clear all image modifications.
 const clearAllButton = document.getElementById('clear_all').addEventListener('click', () => {
+    redrawImage(true);
 });
 
 // Returns Unit. By default all percentage-based unit is normalised in each tool.
@@ -131,8 +133,12 @@ function formatFilters(filters) {
     return filterString;
 }
 
-// Redraws image after applying filters.
-function redrawImage() {
-    canvasContext.filter = formatFilters(filters);
+// Redraws image with filter by default.
+function redrawImage(removeFilters = false) {
+    if (!removeFilters){
+        canvasContext.filter = formatFilters(filters);
+    } else {
+        canvasContext.filter = 'none';
+    }
     canvasContext.drawImage(image, 0, 0);
 }
