@@ -12,6 +12,12 @@ loadImage.addEventListener('change', e => {
         canvas.height = image.naturalHeight;
         canvas.width = image.naturalWidth;
         canvasContext.drawImage(image, 0, 0);
+        Object.keys(filters).forEach(filter => {
+            const input = 
+                document.getElementById(filter) || 
+                document.querySelector(`[data-filter=${filter}`);
+            if (input) input.value = 0;
+        });
     }
 });
 
