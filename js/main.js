@@ -15,6 +15,26 @@ loadImage.addEventListener('change', e => {
     }
 });
 
+// Save Image from Canvas
+const saveImage = document.getElementById('save_image').addEventListener('click', () => {
+    if (!image.src) return;
+    let imageFormat = 'png';
+    let type = '';
+    switch (imageFormat) {
+        case 'jpeg':
+            type = 'image/jpeg';
+            break;
+        case 'webp':
+            type = 'image/webp';
+            break;
+        default:
+            type = 'image/png';
+            break;
+    }
+    
+    canvas.toDataUrl(type);
+});
+
 // Exposure
 const exposureSlider = document.getElementById('exposure');
 exposureSlider.addEventListener('change', () => {
