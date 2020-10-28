@@ -11,7 +11,7 @@
     <div class="tool-bar">
         <div id="new_image" class="tool"><i class="far fa-image"></i>New Image</div>
         <input id="load_image" type="file" accept="image/*" class="tool">
-        <div id="save_image" class="tool"><i class="far fa-save"></i>Save Image</div>
+        <div id="open_save_dialogue" class="tool"><i class="far fa-save"></i>Save Image</div>
     </div>
     <div class="side-bar">
         <div class="tool-group">
@@ -50,10 +50,23 @@
         </div>
         <div id="clear_all" class="tool"><i class="fas fa-edit"></i>Clear All</div>
     </div>
-    <div class ="image-canvas">
+    <div class="image-canvas">
         <canvas id="canvas"></canvas>
     </div>
-    <script src="js/util.js"></script>
+    <div id="save_image_modal" class="modal">
+        <div class="modal-content">
+            <span id="modal_close_btn" class="modal-close">&times;</span>
+            Save Image As:
+            <select id="image_format">
+                <option value="png">png</option>
+                <option value="bmp">bmp</option>
+                <option value="jpeg">jpeg</option>
+                <option value="webp">webp</option>
+            </select>
+            <button id="save_image_modal">Save</button>
+            <button id="modal_cancel_btn">Cancel</button>
+        </div>
+    </div>
     <script src="js/main.js"></script>
     <script src="https://kit.fontawesome.com/647d4d2c3c.js" crossorigin="anonymous"></script>
 </body>

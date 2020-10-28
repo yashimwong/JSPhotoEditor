@@ -21,12 +21,33 @@ loadImage.addEventListener('change', e => {
     }
 });
 
-// Save Image from Canvas
-const saveImage = document.getElementById('save_image').addEventListener('click', () => {
+const saveImageModal = document.getElementById('save_image_modal');
+const modalSaveBtn = document.getElementById('modal_save_btn');
+const modalCloseBtn = document.getElementById('modal_close_btn');
+const modalCancelBtn = document.getElementById('modal_cancel_btn');
+const imageFormatDropdown = document.getElementById('image_format');
+
+// Save Image Modal
+const saveImage = document.getElementById('open_save_dialogue').addEventListener('click', () => {
+    saveImageModal.style.display = 'block';
+});
+
+// Close Events
+modalCloseBtn.addEventListener('click', closeModal);
+modalCancelBtn.addEventListener('click', closeModal);
+function closeModal() {
+    saveImageModal.style.display = 'none';
+}
+
+// Save Event
+saveImageModal.addEventListener('click', () => {
     if (!image.src) return;
     let imageFormat = 'png';
-    let type = '';
+    let type = imageFormatDropdown.value;
     switch (imageFormat) {
+        case 'bmp':
+            type = 'image/bmp';
+            break;
         case 'jpeg':
             type = 'image/jpeg';
             break;
@@ -37,8 +58,9 @@ const saveImage = document.getElementById('save_image').addEventListener('click'
             type = 'image/png';
             break;
     }
-    
-    canvas.toDataUrl(type);
+
+    let imageURL = canvas.toDataURL(type).replace(type, 'image/octet-stream');
+    window.location.href = imageURL;
 });
 
 // Exposure
