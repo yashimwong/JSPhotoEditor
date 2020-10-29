@@ -40,14 +40,11 @@ function closeModal() {
 }
 
 // Save Event
-saveImageModal.addEventListener('click', () => {
+modalSaveBtn.addEventListener('click', () => {
     if (!image.src) return;
-    let imageFormat = 'png';
-    let type = imageFormatDropdown.value;
+    let type;
+    let imageFormat = imageFormatDropdown.value;
     switch (imageFormat) {
-        case 'bmp':
-            type = 'image/bmp';
-            break;
         case 'jpeg':
             type = 'image/jpeg';
             break;
@@ -58,10 +55,19 @@ saveImageModal.addEventListener('click', () => {
             type = 'image/png';
             break;
     }
-
-    let imageURL = canvas.toDataURL(type).replace(type, 'image/octet-stream');
-    window.location.href = imageURL;
+    let imageURL = canvas.toDataURL(type);
+    downloadImage(imageURL, imageFormat);
 });
+
+// Converts Data URL to Link
+function downloadImage(imageURL, fileExtension) {
+    let a = document.createElement('a');
+    let originalFileName = loadImage.files[0].name.replace(/\.[^/.]+$/, "");
+    a.href = imageURL;
+    a.download = originalFileName + "_jsphotoeditor."  + fileExtension;
+    document.body.appendChild(a);
+    a.click();
+}
 
 // Exposure
 const exposureSlider = document.getElementById('exposure');
