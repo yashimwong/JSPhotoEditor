@@ -21,6 +21,71 @@ loadImage.addEventListener('change', e => {
     }
 });
 
+const saveImageModal = document.getElementById('save_image_modal');
+const modalSaveBtn = document.getElementById('modal_save_btn');
+const modalCloseBtn = document.getElementById('modal_close_btn');
+const modalCancelBtn = document.getElementById('modal_cancel_btn');
+const imageFormatDropdown = document.getElementById('image_format');
+
+// Image Format Dropdown Event
+imageFormatDropdown.addEventListener('click', () => {
+    let imageCompressionLabel = document.getElementById('image_compression_label');
+    if (imageFormatDropdown.value === 'jpeg' ){
+        imageCompressionLabel.style.display = 'block';
+    } else {
+        imageCompressionLabel.style.display = 'none';
+    }
+});
+
+// Save Image Modal
+const saveImage = document.getElementById('open_save_dialogue').addEventListener('click', () => {
+    saveImageModal.style.display = 'block';
+});
+
+// Close Events
+modalCloseBtn.addEventListener('click', closeModal);
+modalCancelBtn.addEventListener('click', closeModal);
+function closeModal() {
+    saveImageModal.style.display = 'none';
+}
+
+// Save Event
+modalSaveBtn.addEventListener('click', () => {
+    if (!image.src) return;
+    let type;
+    let imageFormat = imageFormatDropdown.value;
+    switch (imageFormat) {
+        case 'jpeg':
+            type = 'image/jpeg';
+            break;
+        case 'webp':
+            type = 'image/webp';
+            break;
+        default:
+            type = 'image/png';
+            break;
+    }
+
+    let imageURL;
+    if (imageFormat === 'jpeg') {
+        let compressionLevel = parseInt(document.getElementById('image_compression').value);
+        imageURL = canvas.toDataURL(type, compressionLevel);
+    } else {
+        imageURL = canvas.toDataURL(type);
+    }
+    downloadImage(imageURL, imageFormat);
+});
+
+// Converts Data URL to Link
+function downloadImage(imageURL, fileExtension) {
+    let a = document.createElement('a');
+    let originalFileName = loadImage.files[0].name.replace(/\.[^/.]+$/, "");
+    a.href = imageURL;
+    a.download = originalFileName + "_jsphotoeditor."  + fileExtension;
+    document.body.appendChild(a);
+    a.click();
+}
+
 // Exposure
 const exposureSlider = document.getElementById('exposure');
 exposureSlider.addEventListener('change', () => {
