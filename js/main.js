@@ -27,6 +27,16 @@ const modalCloseBtn = document.getElementById('modal_close_btn');
 const modalCancelBtn = document.getElementById('modal_cancel_btn');
 const imageFormatDropdown = document.getElementById('image_format');
 
+// Image Format Dropdown Event
+imageFormatDropdown.addEventListener('click', () => {
+    let imageCompressionLabel = document.getElementById('image_compression_label');
+    if (imageFormatDropdown.value === 'jpeg' ){
+        imageCompressionLabel.style.display = 'block';
+    } else {
+        imageCompressionLabel.style.display = 'none';
+    }
+});
+
 // Save Image Modal
 const saveImage = document.getElementById('open_save_dialogue').addEventListener('click', () => {
     saveImageModal.style.display = 'block';
@@ -55,7 +65,14 @@ modalSaveBtn.addEventListener('click', () => {
             type = 'image/png';
             break;
     }
-    let imageURL = canvas.toDataURL(type);
+
+    let imageURL;
+    if (imageFormat === 'jpeg') {
+        let compressionLevel = parseInt(document.getElementById('image_compression').value);
+        imageURL = canvas.toDataURL(type, compressionLevel);
+    } else {
+        imageURL = canvas.toDataURL(type);
+    }
     downloadImage(imageURL, imageFormat);
 });
 
