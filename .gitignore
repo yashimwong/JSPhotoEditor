@@ -75,3 +75,4 @@ fabric.properties
 package-lock.json
 tailwind.config.js
 base.css
+.idea/vcs.xml
