@@ -72,10 +72,10 @@ function drawRectangle(centerX, centerY) {
 }
 
 function drawTriangle(centerX, centerY) {
-    let sideLength = 30;
+    let height = 200 * Math.cos(Math.PI / 6);
     canvasContext.beginPath();
-    canvasContext.moveTo(centerX + sideLength * Math.cos(60 * Math.PI / 180), centerY + sideLength * Math.sin(60 * Math.PI / 180));
-    canvasContext.lineTo(centerX + sideLength * Math.cos(120 * Math.PI / 180), centerY + sideLength * Math.sin(120 * Math.PI / 180));
-    canvasContext.lineTo(centerX + sideLength * Math.cos(180 * Math.PI / 180), centerY + sideLength * Math.sin(180 * Math.PI / 180));
+    canvasContext.moveTo(centerX, centerY);
+    canvasContext.lineTo(centerX+200,centerY);
+    canvasContext.lineTo(centerX+100,centerY - height);
     canvasContext.fill();
 }
