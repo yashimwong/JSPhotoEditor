@@ -1,60 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Oswald&family=Roboto&display=swap" rel="stylesheet">
-    <link href="css/main.css" rel="stylesheet">
-    <link href="css/output.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat&family=Oswald&family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <link href="css/main.css" rel="stylesheet" />
+    <link href="css/output.css" rel="stylesheet" />
     <title>Photo Editor</title>
-</head>
-<body>
-    <div class="tool-bar">
-        <div id="new_image" class="tool"><i class="far fa-image"></i>New Image</div>
-        <input id="load_image" type="file" accept="image/*" class="tool">
-        <div id="save_image" class="tool"><i class="far fa-save"></i>Save Image</div>
+  </head>
+  <body>
+    <div class="min-h-screen bg-white">
+      <nav class="bg-white border-b border-gray-200 mx-auto w-screen">
+        <div class="mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <div class="flex">
+              <div class="flex-shrink-0 flex items-center">
+                <img class="h-8 w-auto" src="media/logo.png" alt="Our logo" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Upload/Download Bar -->
+      <div class="pt-2">
+        <header>
+          <div class="mx-auto pl-24">
+            <div class="bg-gray-900 h-12 w-96 flex flex-row rounded-md items-center">
+              <button class="bg-gray-600 ml-2 rounded-md hover:bg-blue-light text-gray-300 font-bold h-10 w-48 inline-flex items-center">
+                <svg
+                  class="w-7 h-7 text-gray-300 ml-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                  ></path>
+                </svg>
+                 <span class="ml-2">Upload Image</span>
+             </button>
+             <input
+                 class="cursor-pointer absolute block py-2 px-4 w-48 opacity-0 pin-r pin-t"
+                 id="load_image"
+                 type="file"
+                 name="documents[]"
+                 accept="image/*"
+             >
+              <div
+              id="open_save_dialogue"
+                class="w-10 ml-1 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
+              >
+                <svg
+                  class="w-7 h-7 text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main>
+          <div class="px-8">
+            <div class="pl-16 px-4 py-6">
+              <div
+                class="border-4 border-dashed border-gray-200 rounded-lg h-auto"
+              >
+                <div class="image-canvas">
+                  <canvas id="canvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
-    <div class="side-bar">
-        <div class="tool-group">
-            <div id="correction" class="tool"><i class="fas fa-edit"></i>Correction</div>
-            <div class="sub-tool">
-                <label>Exposure: <input id="exposure" type="range"></label>
-                <label>Contrast: <input id="contrast" type="range"></label>
-            </div>
-        </div>
-        <div class="tool-group">
-            <div id="draw_shapes" class="tool"><i class="fas fa-edit"></i>Draw Shapes</div>
-            <div id="circle_tool" class="sub-tool">Circle</div>
-            <div id="rectangle_tool" class="sub-tool">Rectangle</div>
-            <div id="triangle_tool" class="sub-tool">Triangle</div>
-            <div id="polygon_tool" class="sub-tool">Polygon (Freeform)</div>
-        </div>
-        <div class="tool-group">
-            <div id="blur_tool" class="tool"><i class="fas fa-quidditch"></i>Blur</div>
-            <div class="sub-tool">
-                <label>Radius: <input id="blur_radius" type="range"></label>
-                <label>Strength: <input id="blur_strength" type="range"></label>
-            </div>
-        </div>
-        <div class="tool-group">
-            <div id="sharpen_tool" class="tool"><i class="fab fa-codepen"></i>Sharpen</div>
-            <div class="sub-tool">
-                <label>Strength: <input id="sharpen_strength" type="range"></label>
-            </div>
-        </div>
-        <div class="tool-group">
-            <div id="color_filter_tool" class="tool"><i class="fas fa-palette"></i>Color Filter</div>
-            <div class="sub-tool">
-                <label>Color: <input id="color_picker" type="color" value="#fdffff"></label>
-                <label>Opacity: <input id="color_opacity" type="range"></label>
-            </div>
-        </div>
-        <div id="clear_all" class="tool"><i class="fas fa-edit"></i>Clear All</div>
+
+    <!-- Menu Bar -->
+    <div
+      class="bg-gray-900 w-12 h-96 flex flex-col rounded-md items-center fixed inset-y-36 inset-x-8"
+    >
+      <div
+        class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
+      >
+        <svg
+          class="w-7 h-7 text-gray-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+          ></path>
+        </svg>
+      </div>
+      <div
+        class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
+      >
+        <svg
+          class="w-7 h-7 text-gray-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+          ></path>
+        </svg>
+      </div>
+      <div
+        class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
+      >
+        <svg
+          class="w-7 h-7 text-gray-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+          ></path>
+        </svg>
+      </div>
+      <div
+        class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
+      >
+        <svg
+          class="w-7 h-7 text-gray-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          ></path>
+        </svg>
+      </div>
+      <div
+        class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
+      >
+        <svg
+          class="w-7 h-7 text-gray-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          ></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+          ></path>
+        </svg>
+      </div>
+      <div
+        class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
+      >
+        <svg
+          class="w-7 h-7 text-gray-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+          ></path>
+        </svg>
+      </div>
     </div>
-    <div class ="image-canvas">
-        <canvas id="canvas"></canvas>
+  </body>
+
+  <div id="save_image_modal" class="modal">
+    <div class="modal-content">
+        <span id="modal_close_btn" class="modal-close">&times;</span>
+        Save Image As:
+        <select id="image_format">
+            <option value="png">png</option>
+            <option value="jpeg">jpeg</option>
+            <option value="webp">webp</option>
+        </select>
+        <label id="image_compression_label">Image Compression: <input id="image_compression" type="range" min="0" max="1" step="0.1" value="1"></label>
+        <button id="modal_save_btn">Save</button>
+        <button id="modal_cancel_btn">Cancel</button>
     </div>
+</div>
+
+  <footer>
     <script src="js/main.js"></script>
-    <script src="https://kit.fontawesome.com/647d4d2c3c.js" crossorigin="anonymous"></script>
-</body>
+    <script
+      src="https://kit.fontawesome.com/647d4d2c3c.js"
+      crossorigin="anonymous"
+    ></script>
+  </footer>
 </html>
