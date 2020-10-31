@@ -26,6 +26,19 @@ const modalSaveBtn = document.getElementById('modal_save_btn');
 const modalCloseBtn = document.getElementById('modal_close_btn');
 const modalCancelBtn = document.getElementById('modal_cancel_btn');
 const imageFormatDropdown = document.getElementById('image_format');
+const exposureCTA = document.getElementById('exposure-slider-cta');
+const contrastCTA = document.getElementById('contrast-slider-cta');
+
+// Open Menu
+contrastCTA.addEventListener('click', () => {
+    let contrastSlider = document.getElementById('contrast-slider');
+    contrastSlider.style.display = 'block';
+});
+
+exposureCTA.addEventListener('click', () => {
+    let exposureSlider = document.getElementById('exposure-slider');
+    exposureSlider.style.display = 'block';
+});
 
 // Image Format Dropdown Event
 imageFormatDropdown.addEventListener('click', () => {

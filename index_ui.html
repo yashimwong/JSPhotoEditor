@@ -29,8 +29,12 @@
       <div class="pt-2">
         <header>
           <div class="mx-auto pl-24">
-            <div class="bg-gray-900 h-12 w-96 flex flex-row rounded-md items-center">
-              <button class="bg-gray-600 ml-2 rounded-md hover:bg-blue-light text-gray-300 font-bold h-10 w-48 inline-flex items-center">
+            <div
+              class="bg-gray-900 h-12 w-96 flex flex-row rounded-md items-center"
+            >
+              <button
+                class="bg-gray-600 ml-2 rounded-md hover:bg-blue-light text-gray-300 font-bold h-10 w-48 inline-flex items-center"
+              >
                 <svg
                   class="w-7 h-7 text-gray-300 ml-4"
                   fill="none"
@@ -45,18 +49,18 @@
                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                   ></path>
                 </svg>
-                 <span class="ml-2">Upload Image</span>
-             </button>
-             <input
-                 class="cursor-pointer absolute block py-2 px-4 w-48 opacity-0 pin-r pin-t"
-                 id="load_image"
-                 type="file"
-                 name="documents[]"
-                 accept="image/*"
-             >
+                <span class="ml-2">Upload Image</span>
+              </button>
+              <input
+                class="cursor-pointer absolute block py-2 px-4 w-48 opacity-0 pin-r pin-t"
+                id="load_image"
+                type="file"
+                name="documents[]"
+                accept="image/*"
+              />
               <div
-              id="open_save_dialogue"
-                class="w-10 ml-1 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
+                id="open_save_dialogue"
+                class="w-10 ml-2 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
               >
                 <svg
                   class="w-7 h-7 text-gray-300"
@@ -98,7 +102,8 @@
     >
       <div
         class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
-      >
+        id="exposure-slider-cta"
+        >
         <svg
           class="w-7 h-7 text-gray-300"
           fill="none"
@@ -116,7 +121,9 @@
       </div>
       <div
         class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
-      >
+
+      id="contrast-slider-cta"
+        >
         <svg
           class="w-7 h-7 text-gray-300"
           fill="none"
@@ -134,7 +141,8 @@
       </div>
       <div
         class="w-10 m-1 mb-0 h-10 bg-gray-600 hover:bg-gray-900 border rounded-md border-gray-700 flex flex-row justify-center items-center"
-      >
+
+        >
         <svg
           class="w-7 h-7 text-gray-300"
           fill="none"
@@ -211,22 +219,57 @@
         </svg>
       </div>
     </div>
+
+  <!-- Range Menu -->
+  <div class="bg-gray-900 w-40 text-gray-300 flex flex-wrap p-4 fixed top-40  ml-16 hidden" id="exposure-slider">
+    <label
+      >Exposure:
+      <input
+        class="appearance-none w-full h-2 bg-gray-700"
+        id="exposure"
+        data-filter="brightness"
+        type="range"
+        value="0"
+      />
+    </label>
+  </div>
+  <div class="bg-gray-900 w-40 text-gray-300 flex flex-wrap p-4 fixed top-40  ml-16 -mb-4 hidden" id="contrast-slider">
+    <label
+      >Contrast:
+      <input
+        class="appearance-none w-full h-2 bg-gray-700"
+        id="contrast"
+        type="range"
+        value="0"
+      />
+    </label>
+  </div>
+
   </body>
 
   <div id="save_image_modal" class="modal">
     <div class="modal-content">
-        <span id="modal_close_btn" class="modal-close">&times;</span>
-        Save Image As:
-        <select id="image_format">
-            <option value="png">png</option>
-            <option value="jpeg">jpeg</option>
-            <option value="webp">webp</option>
-        </select>
-        <label id="image_compression_label">Image Compression: <input id="image_compression" type="range" min="0" max="1" step="0.1" value="1"></label>
-        <button id="modal_save_btn">Save</button>
-        <button id="modal_cancel_btn">Cancel</button>
+      <span id="modal_close_btn" class="modal-close">&times;</span>
+      Save Image As:
+      <select id="image_format">
+        <option value="png">png</option>
+        <option value="jpeg">jpeg</option>
+        <option value="webp">webp</option>
+      </select>
+      <label id="image_compression_label"
+        >Image Compression:
+        <input
+          id="image_compression"
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
+          value="1"
+      /></label>
+      <button id="modal_save_btn">Save</button>
+      <button id="modal_cancel_btn">Cancel</button>
     </div>
-</div>
+  </div>
 
   <footer>
     <script src="js/main.js"></script>
