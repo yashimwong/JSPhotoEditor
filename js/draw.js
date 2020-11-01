@@ -1,14 +1,20 @@
+let points = {};
 let activeTool;
+let activeToolControls = {};
 
-const circleBtn = document.getElementById('circle_tool').addEventListener('click', function() {
+const circleTool = document.getElementById('circle_tool');
+const rectangleTool = document.getElementById('rectangle_tool');
+const triangleTool = document.getElementById('triangle_tool');
+
+const circleBtn = circleTool.addEventListener('click', function() {
     toggleDrawingMode(this);
 });
 
-const rectangleBtn = document.getElementById('rectangle_tool').addEventListener('click', function() {
+const rectangleBtn = rectangleTool.addEventListener('click', function() {
     toggleDrawingMode(this);
 });
 
-const triangleBtn = document.getElementById('triangle_tool').addEventListener('click', function() {
+const triangleBtn = triangleTool.addEventListener('click', function() {
     toggleDrawingMode(this);
 });
 
@@ -31,21 +37,19 @@ canvas.addEventListener('click', drawShapes);
 function drawShapes(event) {
     if (!activeTool) return;
     let mouseCoordinate = getMousePosition(event);
-    x = mouseCoordinate.X;
-    y = mouseCoordinate.Y;
 
     switch(activeTool) {
         case 'circle':
-            drawCircle(x, y);
+            drawCircle(mouseCoordinate);
             break;
         case 'rectangle':
-            drawRectangle(x, y);
+            drawRectangle(mouseCoordinate);
             break;
         case 'triangle':
-            drawTriangle(x, y);
+            drawTriangle(mouseCoordinate);
             break;
         default:
-            drawPolygon(x,y);
+            drawPolygon(mouseCoordinate);
             break;
     }
 }
@@ -58,24 +62,26 @@ function getMousePosition(event) {
     };
 }
 
-function drawCircle(centerX, centerY) {
+function drawCircle({X, Y}) {
     let radius = 30;
     canvasContext.beginPath();
-    canvasContext.arc(centerX - radius, centerY - radius, radius, 0, Math.PI * 2);
+    canvasContext.arc(X, Y, radius, 0, Math.PI * 2);
     canvasContext.fill();
 }
 
-function drawRectangle(centerX, centerY) {
+function drawRectangle({X, Y}) {
     let width = 100;
     let height = 30;
-    canvasContext.fillRect(centerX - width/2, centerY - height/2, width, height);
+    canvasContext.fillRect(X - width/2, Y - height/2, width, height);
 }
 
-function drawTriangle(centerX, centerY) {
-    let height = 200 * Math.cos(Math.PI / 6);
+function drawTriangle({X, Y}) {
+    let width = 100;
+    let height = 100;
     canvasContext.beginPath();
-    canvasContext.moveTo(centerX, centerY);
-    canvasContext.lineTo(centerX+200,centerY);
-    canvasContext.lineTo(centerX+100,centerY - height);
+    canvasContext.moveTo(x, y);
+    canvasContext.lineTo(x - width, y);
+    canvasContext.lineTo(x - width/2, y - height);
+    canvasContext.lineTo(x, y);
     canvasContext.fill();
 }
