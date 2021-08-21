@@ -51,6 +51,7 @@ body > * {
     border-radius: 0.3rem;
     border-width: 1px;
     padding: 0.5rem;
+    cursor: pointer;
 }
 
 .tool {
@@ -121,6 +122,9 @@ body > * {
 
 #canvas {
     background-color: grey;
+    display: block;
+    height: auto;
+    max-width: 100%;
     position: relative;
 }
 .center-div {

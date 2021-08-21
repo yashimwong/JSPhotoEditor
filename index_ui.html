@@ -8,10 +8,7 @@
       rel="stylesheet"
     />
     <link href="css/main.css" rel="stylesheet" />
-    <link
-      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"></script>
     <title>Photo Editor</title>
   </head>
   <body>
@@ -369,6 +366,8 @@
           id="exposure"
           data-filter="brightness"
           type="range"
+          min="-100"
+          max="100"
           value="0"
         />
       </label>
@@ -394,41 +393,36 @@
           class="appearance-none w-full h-2 bg-gray-700"
           id="contrast"
           type="range"
+          min="-100"
+          max="100"
           value="0"
         />
       </label>
     </div>
-  </body>
-
-  <div id="save_image_modal" class="modal">
-    <div class="modal-content">
-      <span id="modal_close_btn" class="modal-close">&times;</span>
-      Save Image As:
-      <select id="image_format">
-        <option value="png">png</option>
-        <option value="jpeg">jpeg</option>
-        <option value="webp">webp</option>
-      </select>
-      <label id="image_compression_label"
-        >Image Compression:
-        <input
-          id="image_compression"
-          type="range"
-          min="0"
-          max="1"
-          step="0.1"
-          value="1"
-      /></label>
-      <button id="modal_save_btn">Save</button>
-      <button id="modal_cancel_btn">Cancel</button>
+    <div id="save_image_modal" class="modal">
+      <div class="modal-content">
+        <span id="modal_close_btn" class="modal-close">&times;</span>
+        Save Image As:
+        <select id="image_format">
+          <option value="png">png</option>
+          <option value="jpeg">jpeg</option>
+          <option value="webp">webp</option>
+        </select>
+        <label id="image_compression_label"
+          >Image Compression:
+          <input
+            id="image_compression"
+            type="range"
+            min="0"
+            max="1"
+            step="0.1"
+            value="1"
+        /></label>
+        <button id="modal_save_btn">Save</button>
+        <button id="modal_cancel_btn">Cancel</button>
+      </div>
     </div>
-  </div>
 
-  <footer>
     <script src="js/main.js"></script>
-    <script
-      src="https://kit.fontawesome.com/647d4d2c3c.js"
-      crossorigin="anonymous"
-    ></script>
-  </footer>
+  </body>
 </html>

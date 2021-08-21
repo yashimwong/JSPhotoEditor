@@ -1,228 +1,365 @@
-let filters = {};
-let image = new Image();
-const loadImage = document.getElementById('load_image');
-const canvas = document.getElementById('canvas');
-let canvasContext = canvas.getContext('2d');
+(() => {
+    'use strict';
 
-// Load Image from Upload File
-loadImage.addEventListener('change', e => {
-    let file = loadImage.files[0];
-    image.src = URL.createObjectURL(file);
-    image.onload = () => {
-        canvas.height = image.naturalHeight;
-        canvas.width = image.naturalWidth;
-        canvasContext.drawImage(image, 0, 0);
-        Object.keys(filters).forEach(filter => {
-            const input = 
-                document.getElementById(filter) || 
-                document.querySelector(`[data-filter=${filter}`);
-            if (input) input.value = 0;
+    const loadImage = document.getElementById('load_image');
+    const canvas = document.getElementById('canvas');
+
+    if (!loadImage || !canvas) {
+        return;
+    }
+
+    const canvasContext = canvas.getContext('2d', { willReadFrequently: true });
+
+    if (!canvasContext) {
+        return;
+    }
+
+    const controls = {
+        exposure: document.getElementById('exposure'),
+        contrast: document.getElementById('contrast'),
+        blurRadius: document.getElementById('blur_radius'),
+        blurStrength: document.getElementById('blur_strength'),
+        sharpenStrength: document.getElementById('sharpen_strength'),
+        color: document.getElementById('color_picker'),
+        colorOpacity: document.getElementById('color_opacity')
+    };
+    const saveImageModal = document.getElementById('save_image_modal');
+    const modalSaveButton = document.getElementById('modal_save_btn');
+    const modalCloseButton = document.getElementById('modal_close_btn');
+    const modalCancelButton = document.getElementById('modal_cancel_btn');
+    const imageFormatDropdown = document.getElementById('image_format');
+    const imageCompression = document.getElementById('image_compression');
+    const imageCompressionLabel = document.getElementById('image_compression_label');
+    const openSaveButton = document.getElementById('open_save_dialogue');
+    const clearAllButton = document.getElementById('clear_all');
+    const newImageButton = document.getElementById('new_image');
+    const exposureButton = document.getElementById('exposure-slider-cta');
+    const contrastButton = document.getElementById('contrast-slider-cta');
+    const exposurePanel = document.getElementById('exposure-slider');
+    const contrastPanel = document.getElementById('contrast-slider');
+    const shapes = [];
+    const state = {
+        brightness: 1,
+        contrast: 1,
+        blur: 0,
+        sharpen: 0,
+        color: controls.color?.value || '#ffffff',
+        colorOpacity: 0
+    };
+    let image;
+    let imageObjectUrl;
+    let originalFileName = 'image';
+    let shapeRenderer = () => {};
+
+    function listen(element, eventName, listener) {
+        element?.addEventListener(eventName, listener);
+    }
+
+    function numberValue(element, fallback = 0) {
+        const value = Number(element?.value);
+        return Number.isFinite(value) ? value : fallback;
+    }
+
+    function resetState() {
+        state.brightness = 1;
+        state.contrast = 1;
+        state.blur = 0;
+        state.sharpen = 0;
+        state.color = controls.color?.defaultValue || '#ffffff';
+        state.colorOpacity = 0;
+        shapes.length = 0;
+
+        Object.values(controls).forEach(control => {
+            if (control) {
+                control.value = control.defaultValue;
+            }
         });
-    }
-});
 
-const saveImageModal = document.getElementById('save_image_modal');
-const modalSaveBtn = document.getElementById('modal_save_btn');
-const modalCloseBtn = document.getElementById('modal_close_btn');
-const modalCancelBtn = document.getElementById('modal_cancel_btn');
-const imageFormatDropdown = document.getElementById('image_format');
-const exposureCTA = document.getElementById('exposure-slider-cta');
-const contrastCTA = document.getElementById('contrast-slider-cta');
-
-// Open Menu
-contrastCTA.addEventListener('click', () => {
-    let contrastSlider = document.getElementById('contrast-slider');
-    contrastSlider.style.display = 'block';
-});
-
-exposureCTA.addEventListener('click', () => {
-    let exposureSlider = document.getElementById('exposure-slider');
-    exposureSlider.style.display = 'block';
-});
-
-// Image Format Dropdown Event
-imageFormatDropdown.addEventListener('click', () => {
-    let imageCompressionLabel = document.getElementById('image_compression_label');
-    if (imageFormatDropdown.value === 'jpeg' ){
-        imageCompressionLabel.style.display = 'block';
-    } else {
-        imageCompressionLabel.style.display = 'none';
-    }
-});
-
-// Save Image Modal
-const saveImage = document.getElementById('open_save_dialogue').addEventListener('click', () => {
-    saveImageModal.style.display = 'block';
-});
-
-// Close Events
-modalCloseBtn.addEventListener('click', closeModal);
-modalCancelBtn.addEventListener('click', closeModal);
-function closeModal() {
-    saveImageModal.style.display = 'none';
-}
-
-// Save Event
-modalSaveBtn.addEventListener('click', () => {
-    if (!image.src) return;
-    let type;
-    let imageFormat = imageFormatDropdown.value;
-    switch (imageFormat) {
-        case 'jpeg':
-            type = 'image/jpeg';
-            break;
-        case 'webp':
-            type = 'image/webp';
-            break;
-        default:
-            type = 'image/png';
-            break;
+        window.dispatchEvent(new Event('photoeditor:clear'));
     }
 
-    let imageURL;
-    if (imageFormat === 'jpeg') {
-        let compressionLevel = parseInt(document.getElementById('image_compression').value);
-        imageURL = canvas.toDataURL(type, compressionLevel);
-    } else {
-        imageURL = canvas.toDataURL(type);
+    function formatFilters() {
+        return [
+            `brightness(${state.brightness})`,
+            `contrast(${state.contrast})`,
+            `blur(${state.blur}px)`
+        ].join(' ');
     }
-    downloadImage(imageURL, imageFormat);
-});
 
-// Converts Data URL to Link
-function downloadImage(imageURL, fileExtension) {
-    let a = document.createElement('a');
-    let originalFileName = loadImage.files[0].name.replace(/\.[^/.]+$/, "");
-    a.href = imageURL;
-    a.download = originalFileName + "_jsphotoeditor."  + fileExtension;
-    document.body.appendChild(a);
-    a.click();
-}
+    function applySharpen() {
+        if (state.sharpen <= 0 || canvas.width === 0 || canvas.height === 0) {
+            return;
+        }
 
-// Exposure
-const exposureSlider = document.getElementById('exposure');
-exposureSlider.addEventListener('change', () => {
-    if (!image.src) return;
-    filters['brightness'] = 1 + (1 * exposureSlider.value / 100);
-    redrawImage();
-});
+        const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+        const source = new Uint8ClampedArray(imageData.data);
+        const destination = imageData.data;
+        const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0];
 
-// Contrast
-const contrastSlider = document.getElementById('contrast');
-contrastSlider.addEventListener('change', () => {
-    if (!image.src) return;
-    filters['contrast'] = 1 + (1 * contrastSlider.value / 100);
-    redrawImage();
-});
+        for (let y = 0; y < canvas.height; y += 1) {
+            for (let x = 0; x < canvas.width; x += 1) {
+                const destinationOffset = (y * canvas.width + x) * 4;
+                const sharpened = [0, 0, 0];
 
-// Blur
-const blurRadius = document.getElementById('blur_radius');
-const blurStrength = document.getElementById('blur_strength');
-blurRadius.addEventListener('change', blurChanged);
-blurStrength.addEventListener('change', blurChanged);
-function blurChanged() {
-    if (!image.src) return;
-    filters['blur'] = Math.round(blurRadius.value / 1000 * blurStrength.value);
-    redrawImage();
-}
+                for (let kernelY = -1; kernelY <= 1; kernelY += 1) {
+                    for (let kernelX = -1; kernelX <= 1; kernelX += 1) {
+                        const sourceX = Math.min(canvas.width - 1, Math.max(0, x + kernelX));
+                        const sourceY = Math.min(canvas.height - 1, Math.max(0, y + kernelY));
+                        const sourceOffset = (sourceY * canvas.width + sourceX) * 4;
+                        const weight = weights[(kernelY + 1) * 3 + kernelX + 1];
 
-// Sharpen
-// Modified From: https://gist.github.com/mikecao/65d9fc92dc7197cb8a7c
-const sharpenStrength = document.getElementById('sharpen_strength');
-sharpenStrength.addEventListener('change', () => {
-    if (!image.src) return;
-    let strength = sharpenStrength.value / 100;
-    let w = image.width, h = image.height;
-    let currentImageData = canvasContext.getImageData(0, 0, w, h);
-    let x, sx, sy, r, g, b, dstOff, srcOff, wt, cx, cy, scy, scx,
-        weights = [0, -1, 0, -1, 5, -1, 0, -1, 0],
-        katet = Math.round(Math.sqrt(weights.length)),
-        half = (katet * 0.5) | 0,
-        dstData = currentImageData,
-        dstBuff = dstData.data,
-        srcBuff = currentImageData.data,
-        y = h;
-
-    while (y--) {
-        x = w;
-        while (x--) {
-            sy = y;
-            sx = x;
-            dstOff = (y * w + x) * 4;
-            r = 0;
-            g = 0;
-            b = 0;
-            a = 0;
-
-            for (cy = 0; cy < katet; cy++) {
-                for (cx = 0; cx < katet; cx++) {
-                    scy = sy + cy - half;
-                    scx = sx + cx - half;
-
-                    if (scy >= 0 && scy < h && scx >= 0 && scx < w) {
-                        srcOff = (scy * w + scx) * 4;
-                        wt = weights[cy * katet + cx];
-
-                        r += srcBuff[srcOff] * wt;
-                        g += srcBuff[srcOff + 1] * wt;
-                        b += srcBuff[srcOff + 2] * wt;
-                        a += srcBuff[srcOff + 3] * wt;
+                        sharpened[0] += source[sourceOffset] * weight;
+                        sharpened[1] += source[sourceOffset + 1] * weight;
+                        sharpened[2] += source[sourceOffset + 2] * weight;
                     }
                 }
-            }
 
-            dstBuff[dstOff] = r * strength + srcBuff[dstOff] * (1 - strength);
-            dstBuff[dstOff + 1] = g * strength + srcBuff[dstOff + 1] * (1 - strength);
-            dstBuff[dstOff + 2] = b * strength + srcBuff[dstOff + 2] * (1 - strength);
-            dstBuff[dstOff + 3] = srcBuff[dstOff + 3];
+                for (let channel = 0; channel < 3; channel += 1) {
+                    destination[destinationOffset + channel] =
+                        sharpened[channel] * state.sharpen +
+                        source[destinationOffset + channel] * (1 - state.sharpen);
+                }
+
+                destination[destinationOffset + 3] = source[destinationOffset + 3];
+            }
+        }
+
+        canvasContext.putImageData(imageData, 0, 0);
+    }
+
+    function renderImage() {
+        if (!image) {
+            canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+
+        canvasContext.save();
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        canvasContext.globalAlpha = 1;
+        canvasContext.globalCompositeOperation = 'source-over';
+        canvasContext.filter = formatFilters();
+        canvasContext.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvasContext.restore();
+
+        applySharpen();
+
+        if (state.colorOpacity > 0) {
+            canvasContext.save();
+            canvasContext.filter = 'none';
+            canvasContext.globalAlpha = state.colorOpacity;
+            canvasContext.globalCompositeOperation = 'source-atop';
+            canvasContext.fillStyle = state.color;
+            canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+            canvasContext.restore();
+        }
+
+        shapeRenderer(canvasContext, shapes);
+    }
+
+    function closeModal() {
+        if (saveImageModal) {
+            saveImageModal.style.display = 'none';
         }
     }
 
-    canvasContext.putImageData(dstData, 0, 0);
-});
+    function updateCompressionVisibility() {
+        if (!imageCompressionLabel || !imageFormatDropdown) {
+            return;
+        }
 
-// Color Filter
-const colorPicker = document.getElementById('color_picker');
-const colorOpacity = document.getElementById('color_opacity');
-colorPicker.addEventListener('change', colorChanged);
-colorOpacity.addEventListener('change', colorChanged);
-function colorChanged() {
-    if (!image.src) return;
-    canvasContext.fillStyle = colorPicker.value;
-    canvasContext.globalAlpha = colorOpacity.value / 100;
-    canvasContext.fillRect(0, 0, image.width, image.height);
-    redrawImage();
-}
-
-// Clear all image modifications.
-const clearAllButton = document.getElementById('clear_all').addEventListener('click', () => {
-    redrawImage(true);
-});
-
-// Returns Unit. By default all percentage-based unit is normalised in each tool.
-function getUnit(key) {
-    if (key == 'blur') {
-        return 'px';
+        imageCompressionLabel.style.display =
+            imageFormatDropdown.value === 'jpeg' || imageFormatDropdown.value === 'webp'
+                ? ''
+                : 'none';
     }
-    return '';
-}
 
-// Returns the formatted context filter string.
-function formatFilters(filters) {
-    let filterString = '';
-    for (const filter in filters) {
-        filterString += `${filter}(${filters[filter]}${getUnit(filter)}) `;
+    function downloadImage(imageUrl, fileExtension) {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = `${originalFileName}_jsphotoeditor.${fileExtension}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
     }
-    console.log(filterString);
-    return filterString;
-}
 
-// Redraws image with filter by default.
-function redrawImage(removeFilters = false) {
-    if (!removeFilters){
-        canvasContext.filter = formatFilters(filters);
-    } else {
-        canvasContext.filter = 'none';
+    function saveImage() {
+        if (!image || !imageFormatDropdown) {
+            return;
+        }
+
+        const imageFormat = imageFormatDropdown.value;
+        const mimeTypes = {
+            jpeg: 'image/jpeg',
+            png: 'image/png',
+            webp: 'image/webp'
+        };
+        const mimeType = mimeTypes[imageFormat] || mimeTypes.png;
+        const quality = Math.min(1, Math.max(0, numberValue(imageCompression, 1)));
+        const imageUrl =
+            imageFormat === 'jpeg' || imageFormat === 'webp'
+                ? canvas.toDataURL(mimeType, quality)
+                : canvas.toDataURL(mimeType);
+
+        downloadImage(imageUrl, imageFormat);
+        closeModal();
     }
-    canvasContext.drawImage(image, 0, 0);
-}
+
+    function clearImage() {
+        if (imageObjectUrl) {
+            URL.revokeObjectURL(imageObjectUrl);
+        }
+
+        image = undefined;
+        imageObjectUrl = undefined;
+        originalFileName = 'image';
+        loadImage.value = '';
+        resetState();
+        canvas.width = 0;
+        canvas.height = 0;
+        closeModal();
+    }
+
+    function loadSelectedImage() {
+        const file = loadImage.files?.[0];
+
+        if (!file || !file.type.startsWith('image/')) {
+            return;
+        }
+
+        const nextImage = new Image();
+        const nextObjectUrl = URL.createObjectURL(file);
+
+        nextImage.onload = () => {
+            if (imageObjectUrl) {
+                URL.revokeObjectURL(imageObjectUrl);
+            }
+
+            image = nextImage;
+            imageObjectUrl = nextObjectUrl;
+            originalFileName = file.name.replace(/\.[^./\\]+$/, '') || 'image';
+            canvas.width = nextImage.naturalWidth;
+            canvas.height = nextImage.naturalHeight;
+            resetState();
+            renderImage();
+        };
+
+        nextImage.onerror = () => {
+            URL.revokeObjectURL(nextObjectUrl);
+            loadImage.value = '';
+        };
+
+        nextImage.src = nextObjectUrl;
+    }
+
+    function togglePanel(panelToOpen, panelToClose) {
+        panelToClose?.classList.add('hidden');
+        panelToOpen?.classList.toggle('hidden');
+    }
+
+    listen(loadImage, 'change', loadSelectedImage);
+    listen(exposureButton, 'click', () => togglePanel(exposurePanel, contrastPanel));
+    listen(contrastButton, 'click', () => togglePanel(contrastPanel, exposurePanel));
+    listen(imageFormatDropdown, 'change', updateCompressionVisibility);
+    listen(openSaveButton, 'click', () => {
+        if (image && saveImageModal) {
+            saveImageModal.style.display = 'block';
+        }
+    });
+    listen(modalCloseButton, 'click', closeModal);
+    listen(modalCancelButton, 'click', closeModal);
+    listen(modalSaveButton, 'click', saveImage);
+    listen(saveImageModal, 'click', event => {
+        if (event.target === saveImageModal) {
+            closeModal();
+        }
+    });
+    listen(document, 'keydown', event => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+    listen(controls.exposure, 'input', () => {
+        if (!image) {
+            return;
+        }
+
+        state.brightness = Math.max(0, 1 + numberValue(controls.exposure) / 100);
+        renderImage();
+    });
+    listen(controls.contrast, 'input', () => {
+        if (!image) {
+            return;
+        }
+
+        state.contrast = Math.max(0, 1 + numberValue(controls.contrast) / 100);
+        renderImage();
+    });
+
+    const updateBlur = () => {
+        if (!image) {
+            return;
+        }
+
+        state.blur =
+            numberValue(controls.blurRadius) * (numberValue(controls.blurStrength) / 100);
+        renderImage();
+    };
+
+    listen(controls.blurRadius, 'input', updateBlur);
+    listen(controls.blurStrength, 'input', updateBlur);
+    listen(controls.sharpenStrength, 'input', () => {
+        if (!image) {
+            return;
+        }
+
+        state.sharpen = numberValue(controls.sharpenStrength) / 100;
+        renderImage();
+    });
+
+    const updateColor = () => {
+        if (!image) {
+            return;
+        }
+
+        state.color = controls.color?.value || '#ffffff';
+        state.colorOpacity = numberValue(controls.colorOpacity) / 100;
+        renderImage();
+    };
+
+    listen(controls.color, 'input', updateColor);
+    listen(controls.colorOpacity, 'input', updateColor);
+    listen(clearAllButton, 'click', () => {
+        if (!image) {
+            return;
+        }
+
+        resetState();
+        renderImage();
+    });
+    listen(newImageButton, 'click', clearImage);
+    listen(window, 'beforeunload', () => {
+        if (imageObjectUrl) {
+            URL.revokeObjectURL(imageObjectUrl);
+        }
+    });
+
+    window.photoEditor = {
+        addShape(shape) {
+            if (image) {
+                shapes.push(shape);
+                renderImage();
+            }
+        },
+        canvas,
+        hasImage() {
+            return Boolean(image);
+        },
+        render: renderImage,
+        setShapeRenderer(renderer) {
+            shapeRenderer = renderer;
+            renderImage();
+        }
+    };
+
+    updateCompressionVisibility();
+})();
