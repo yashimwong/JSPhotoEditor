@@ -20,6 +20,7 @@
         blurRadius: document.getElementById('blur_radius'),
         blurStrength: document.getElementById('blur_strength'),
         sharpenStrength: document.getElementById('sharpen_strength'),
+        grayscale: document.getElementById('grayscale'),
         color: document.getElementById('color_picker'),
         colorOpacity: document.getElementById('color_opacity')
     };
@@ -43,6 +44,7 @@
         contrast: 1,
         blur: 0,
         sharpen: 0,
+        grayscale: 0,
         color: controls.color?.value || '#ffffff',
         colorOpacity: 0
     };
@@ -65,6 +67,7 @@
         state.contrast = 1;
         state.blur = 0;
         state.sharpen = 0;
+        state.grayscale = 0;
         state.color = controls.color?.defaultValue || '#ffffff';
         state.colorOpacity = 0;
         shapes.length = 0;
@@ -82,7 +85,8 @@
         return [
             `brightness(${state.brightness})`,
             `contrast(${state.contrast})`,
-            `blur(${state.blur}px)`
+            `blur(${state.blur}px)`,
+            `grayscale(${state.grayscale})`
         ].join(' ');
     }
 
@@ -313,6 +317,14 @@
         }
 
         state.sharpen = numberValue(controls.sharpenStrength) / 100;
+        renderImage();
+    });
+    listen(controls.grayscale, 'input', () => {
+        if (!image) {
+            return;
+        }
+
+        state.grayscale = numberValue(controls.grayscale) / 100;
         renderImage();
     });
 
