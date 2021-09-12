@@ -35,6 +35,8 @@
     const openSaveButton = document.getElementById('open_save_dialogue');
     const clearAllButton = document.getElementById('clear_all');
     const newImageButton = document.getElementById('new_image');
+    const rotateLeftButton = document.getElementById('rotate_left');
+    const rotateRightButton = document.getElementById('rotate_right');
     const exposureButton = document.getElementById('exposure-slider-cta');
     const contrastButton = document.getElementById('contrast-slider-cta');
     const exposurePanel = document.getElementById('exposure-slider');
@@ -47,6 +49,7 @@
         sharpen: 0,
         grayscale: 0,
         saturation: 1,
+        rotation: 0,
         color: controls.color?.value || '#ffffff',
         colorOpacity: 0
     };
@@ -71,6 +74,7 @@
         state.sharpen = 0;
         state.grayscale = 0;
         state.saturation = 1;
+        state.rotation = 0;
         state.color = controls.color?.defaultValue || '#ffffff';
         state.colorOpacity = 0;
         shapes.length = 0;
@@ -81,7 +85,66 @@
             }
         });
 
+        resizeCanvas();
         window.dispatchEvent(new Event('photoeditor:clear'));
+    }
+
+    function resizeCanvas() {
+        if (!image) {
+            return;
+        }
+
+        const turns = state.rotation / 90;
+        const swapsDimensions = turns % 2 !== 0;
+        canvas.width = swapsDimensions ? image.naturalHeight : image.naturalWidth;
+        canvas.height = swapsDimensions ? image.naturalWidth : image.naturalHeight;
+    }
+
+    function applyRotation() {
+        if (state.rotation === 90) {
+            canvasContext.translate(canvas.width, 0);
+            canvasContext.rotate(Math.PI / 2);
+        } else if (state.rotation === 180) {
+            canvasContext.translate(canvas.width, canvas.height);
+            canvasContext.rotate(Math.PI);
+        } else if (state.rotation === 270) {
+            canvasContext.translate(0, canvas.height);
+            canvasContext.rotate(-Math.PI / 2);
+        }
+    }
+
+    function rotateImage(degrees) {
+        if (!image) {
+            return;
+        }
+
+        state.rotation = (state.rotation + degrees + 360) % 360;
+        resizeCanvas();
+        renderImage();
+    }
+
+    function toImagePoint(point) {
+        if (!image) {
+            return point;
+        }
+
+        if (state.rotation === 90) {
+            return { ...point, x: point.y, y: image.naturalHeight - point.x };
+        }
+
+        if (state.rotation === 180) {
+            return {
+                ...point,
+                x: image.naturalWidth - point.x,
+                y: image.naturalHeight - point.y
+            };
+        }
+
+        if (state.rotation === 270) {
+            return { ...point, x: image.naturalWidth - point.y, y: point.x };
+        }
+
+        return point;
     }
 
     function formatFilters() {
@@ -146,7 +209,8 @@
         canvasContext.globalAlpha = 1;
         canvasContext.globalCompositeOperation = 'source-over';
         canvasContext.filter = formatFilters();
-        canvasContext.drawImage(image, 0, 0, canvas.width, canvas.height);
+        applyRotation();
+        canvasContext.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
         canvasContext.restore();
 
         applySharpen();
@@ -161,7 +225,10 @@
             canvasContext.restore();
         }
 
+        canvasContext.save();
+        applyRotation();
         shapeRenderer(canvasContext, shapes);
+        canvasContext.restore();
     }
 
     function closeModal() {
@@ -245,8 +312,6 @@
             image = nextImage;
             imageObjectUrl = nextObjectUrl;
             originalFileName = file.name.replace(/\.[^./\\]+$/, '') || 'image';
-            canvas.width = nextImage.naturalWidth;
-            canvas.height = nextImage.naturalHeight;
             resetState();
             renderImage();
         };
@@ -265,6 +330,8 @@
     }
 
     listen(loadImage, 'change', loadSelectedImage);
+    listen(rotateLeftButton, 'click', () => rotateImage(-90));
+    listen(rotateRightButton, 'click', () => rotateImage(90));
     listen(exposureButton, 'click', () => togglePanel(exposurePanel, contrastPanel));
     listen(contrastButton, 'click', () => togglePanel(contrastPanel, exposurePanel));
     listen(imageFormatDropdown, 'change', updateCompressionVisibility);
@@ -382,7 +449,8 @@
         setShapeRenderer(renderer) {
             shapeRenderer = renderer;
             renderImage();
-        }
+        },
+        toImagePoint
     };
 
     updateCompressionVisibility();

@@ -52,7 +52,7 @@
             return;
         }
 
-        const point = getMousePosition(event);
+        const point = editor.toImagePoint(getMousePosition(event));
         const sizeScale = (point.scaleX + point.scaleY) / 2;
 
         editor.addShape({
