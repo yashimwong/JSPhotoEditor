@@ -37,6 +37,8 @@
     const newImageButton = document.getElementById('new_image');
     const rotateLeftButton = document.getElementById('rotate_left');
     const rotateRightButton = document.getElementById('rotate_right');
+    const flipHorizontalButton = document.getElementById('flip_horizontal');
+    const flipVerticalButton = document.getElementById('flip_vertical');
     const exposureButton = document.getElementById('exposure-slider-cta');
     const contrastButton = document.getElementById('contrast-slider-cta');
     const exposurePanel = document.getElementById('exposure-slider');
@@ -50,6 +52,8 @@
         grayscale: 0,
         saturation: 1,
         rotation: 0,
+        flipHorizontal: false,
+        flipVertical: false,
         color: controls.color?.value || '#ffffff',
         colorOpacity: 0
     };
@@ -75,6 +79,8 @@
         state.grayscale = 0;
         state.saturation = 1;
         state.rotation = 0;
+        state.flipHorizontal = false;
+        state.flipVertical = false;
         state.color = controls.color?.defaultValue || '#ffffff';
         state.colorOpacity = 0;
         shapes.length = 0;
@@ -100,7 +106,17 @@
         canvas.height = swapsDimensions ? image.naturalWidth : image.naturalHeight;
     }
 
-    function applyRotation() {
+    function applyTransform() {
+        if (state.flipHorizontal) {
+            canvasContext.translate(canvas.width, 0);
+            canvasContext.scale(-1, 1);
+        }
+
+        if (state.flipVertical) {
+            canvasContext.translate(0, canvas.height);
+            canvasContext.scale(1, -1);
+        }
+
         if (state.rotation === 90) {
             canvasContext.translate(canvas.width, 0);
             canvasContext.rotate(Math.PI / 2);
@@ -123,28 +139,51 @@
         renderImage();
     }
 
+    function toggleFlip(direction) {
+        if (!image) {
+            return;
+        }
+
+        state[direction] = !state[direction];
+        renderImage();
+    }
+
     function toImagePoint(point) {
         if (!image) {
             return point;
         }
 
+        const outputPoint = {
+            ...point,
+            x: state.flipHorizontal ? canvas.width - point.x : point.x,
+            y: state.flipVertical ? canvas.height - point.y : point.y
+        };
+
         if (state.rotation === 90) {
-            return { ...point, x: point.y, y: image.naturalHeight - point.x };
+            return {
+                ...outputPoint,
+                x: outputPoint.y,
+                y: image.naturalHeight - outputPoint.x
+            };
         }
 
         if (state.rotation === 180) {
             return {
-                ...point,
-                x: image.naturalWidth - point.x,
-                y: image.naturalHeight - point.y
+                ...outputPoint,
+                x: image.naturalWidth - outputPoint.x,
+                y: image.naturalHeight - outputPoint.y
             };
         }
 
         if (state.rotation === 270) {
-            return { ...point, x: image.naturalWidth - point.y, y: point.x };
+            return {
+                ...outputPoint,
+                x: image.naturalWidth - outputPoint.y,
+                y: outputPoint.x
+            };
         }
 
-        return point;
+        return outputPoint;
     }
 
     function formatFilters() {
@@ -209,7 +248,7 @@
         canvasContext.globalAlpha = 1;
         canvasContext.globalCompositeOperation = 'source-over';
         canvasContext.filter = formatFilters();
-        applyRotation();
+        applyTransform();
         canvasContext.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
         canvasContext.restore();
 
@@ -226,7 +265,7 @@
         }
 
         canvasContext.save();
-        applyRotation();
+        applyTransform();
         shapeRenderer(canvasContext, shapes);
         canvasContext.restore();
     }
@@ -332,6 +371,8 @@
     listen(loadImage, 'change', loadSelectedImage);
     listen(rotateLeftButton, 'click', () => rotateImage(-90));
     listen(rotateRightButton, 'click', () => rotateImage(90));
+    listen(flipHorizontalButton, 'click', () => toggleFlip('flipHorizontal'));
+    listen(flipVerticalButton, 'click', () => toggleFlip('flipVertical'));
     listen(exposureButton, 'click', () => togglePanel(exposurePanel, contrastPanel));
     listen(contrastButton, 'click', () => togglePanel(contrastPanel, exposurePanel));
     listen(imageFormatDropdown, 'change', updateCompressionVisibility);

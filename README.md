@@ -7,6 +7,7 @@ A simple photo editor made purely using JavaScript, HTML and CSS.
 - Grayscale
 - Saturation
 - 90-degree rotation
+- Horizontal and vertical flipping
 - Blur
 - Sharpen
 - Color Filter
