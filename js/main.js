@@ -39,11 +39,19 @@
     const rotateRightButton = document.getElementById('rotate_right');
     const flipHorizontalButton = document.getElementById('flip_horizontal');
     const flipVerticalButton = document.getElementById('flip_vertical');
+    const undoButton = document.getElementById('undo');
+    const redoButton = document.getElementById('redo');
     const exposureButton = document.getElementById('exposure-slider-cta');
     const contrastButton = document.getElementById('contrast-slider-cta');
     const exposurePanel = document.getElementById('exposure-slider');
     const contrastPanel = document.getElementById('contrast-slider');
     const shapes = [];
+    const undoStack = [];
+    const redoStack = [];
+    const historyLimit = 50;
+    const lastControlValues = Object.fromEntries(
+        Object.entries(controls).map(([name, control]) => [name, control?.value])
+    );
     const state = {
         brightness: 1,
         contrast: 1,
@@ -69,6 +77,87 @@
     function numberValue(element, fallback = 0) {
         const value = Number(element?.value);
         return Number.isFinite(value) ? value : fallback;
+    }
+
+    function createSnapshot() {
+        return {
+            controls: { ...lastControlValues },
+            shapes: shapes.map(shape => ({ ...shape })),
+            state: { ...state }
+        };
+    }
+
+    function rememberControlValues() {
+        Object.entries(controls).forEach(([name, control]) => {
+            lastControlValues[name] = control?.value;
+        });
+    }
+
+    function updateHistoryButtons() {
+        if (undoButton) {
+            undoButton.disabled = !image || undoStack.length === 0;
+        }
+
+        if (redoButton) {
+            redoButton.disabled = !image || redoStack.length === 0;
+        }
+    }
+
+    function clearHistory() {
+        undoStack.length = 0;
+        redoStack.length = 0;
+        updateHistoryButtons();
+    }
+
+    function recordHistory() {
+        if (!image) {
+            return;
+        }
+
+        undoStack.push(createSnapshot());
+
+        if (undoStack.length > historyLimit) {
+            undoStack.shift();
+        }
+
+        redoStack.length = 0;
+        updateHistoryButtons();
+    }
+
+    function restoreSnapshot(snapshot) {
+        Object.assign(state, snapshot.state);
+        shapes.splice(0, shapes.length, ...snapshot.shapes.map(shape => ({ ...shape })));
+
+        Object.entries(snapshot.controls).forEach(([name, value]) => {
+            if (controls[name] && value !== undefined) {
+                controls[name].value = value;
+            }
+        });
+
+        resizeCanvas();
+        renderImage();
+    }
+
+    function undo() {
+        if (!image || undoStack.length === 0) {
+            return false;
+        }
+
+        redoStack.push(createSnapshot());
+        restoreSnapshot(undoStack.pop());
+        updateHistoryButtons();
+        return true;
+    }
+
+    function redo() {
+        if (!image || redoStack.length === 0) {
+            return false;
+        }
+
+        undoStack.push(createSnapshot());
+        restoreSnapshot(redoStack.pop());
+        updateHistoryButtons();
+        return true;
     }
 
     function resetState() {
@@ -134,6 +223,7 @@
             return;
         }
 
+        recordHistory();
         state.rotation = (state.rotation + degrees + 360) % 360;
         resizeCanvas();
         renderImage();
@@ -144,6 +234,7 @@
             return;
         }
 
+        recordHistory();
         state[direction] = !state[direction];
         renderImage();
     }
@@ -268,6 +359,7 @@
         applyTransform();
         shapeRenderer(canvasContext, shapes);
         canvasContext.restore();
+        rememberControlValues();
     }
 
     function closeModal() {
@@ -330,6 +422,7 @@
         resetState();
         canvas.width = 0;
         canvas.height = 0;
+        clearHistory();
         closeModal();
     }
 
@@ -352,6 +445,7 @@
             imageObjectUrl = nextObjectUrl;
             originalFileName = file.name.replace(/\.[^./\\]+$/, '') || 'image';
             resetState();
+            clearHistory();
             renderImage();
         };
 
@@ -373,6 +467,8 @@
     listen(rotateRightButton, 'click', () => rotateImage(90));
     listen(flipHorizontalButton, 'click', () => toggleFlip('flipHorizontal'));
     listen(flipVerticalButton, 'click', () => toggleFlip('flipVertical'));
+    listen(undoButton, 'click', undo);
+    listen(redoButton, 'click', redo);
     listen(exposureButton, 'click', () => togglePanel(exposurePanel, contrastPanel));
     listen(contrastButton, 'click', () => togglePanel(contrastPanel, exposurePanel));
     listen(imageFormatDropdown, 'change', updateCompressionVisibility);
@@ -393,12 +489,27 @@
         if (event.key === 'Escape') {
             closeModal();
         }
+
+        const commandKey = event.ctrlKey || event.metaKey;
+        const key = event.key.toLowerCase();
+        let handled = false;
+
+        if (commandKey && key === 'z') {
+            handled = event.shiftKey ? redo() : undo();
+        } else if (event.ctrlKey && key === 'y') {
+            handled = redo();
+        }
+
+        if (handled) {
+            event.preventDefault();
+        }
     });
     listen(controls.exposure, 'input', () => {
         if (!image) {
             return;
         }
 
+        recordHistory();
         state.brightness = Math.max(0, 1 + numberValue(controls.exposure) / 100);
         renderImage();
     });
@@ -407,6 +518,7 @@
             return;
         }
 
+        recordHistory();
         state.contrast = Math.max(0, 1 + numberValue(controls.contrast) / 100);
         renderImage();
     });
@@ -416,6 +528,7 @@
             return;
         }
 
+        recordHistory();
         state.blur =
             numberValue(controls.blurRadius) * (numberValue(controls.blurStrength) / 100);
         renderImage();
@@ -428,6 +541,7 @@
             return;
         }
 
+        recordHistory();
         state.sharpen = numberValue(controls.sharpenStrength) / 100;
         renderImage();
     });
@@ -436,6 +550,7 @@
             return;
         }
 
+        recordHistory();
         state.grayscale = numberValue(controls.grayscale) / 100;
         renderImage();
     });
@@ -444,6 +559,7 @@
             return;
         }
 
+        recordHistory();
         state.saturation = numberValue(controls.saturation, 100) / 100;
         renderImage();
     });
@@ -453,6 +569,7 @@
             return;
         }
 
+        recordHistory();
         state.color = controls.color?.value || '#ffffff';
         state.colorOpacity = numberValue(controls.colorOpacity) / 100;
         renderImage();
@@ -465,6 +582,7 @@
             return;
         }
 
+        recordHistory();
         resetState();
         renderImage();
     });
@@ -478,6 +596,7 @@
     window.photoEditor = {
         addShape(shape) {
             if (image) {
+                recordHistory();
                 shapes.push(shape);
                 renderImage();
             }
@@ -495,4 +614,5 @@
     };
 
     updateCompressionVisibility();
+    updateHistoryButtons();
 })();

@@ -8,6 +8,7 @@ A simple photo editor made purely using JavaScript, HTML and CSS.
 - Saturation
 - 90-degree rotation
 - Horizontal and vertical flipping
+- Undo and redo (up to 50 editing operations)
 - Blur
 - Sharpen
 - Color Filter
