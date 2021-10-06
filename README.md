@@ -13,4 +13,5 @@ A simple photo editor made purely using JavaScript, HTML and CSS.
 - Sharpen
 - Color Filter
 - Shape Drawing
+- Shape color and opacity controls
 - PNG, JPEG and WebP Export

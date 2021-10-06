@@ -12,6 +12,8 @@
         document.getElementById('rectangle_tool'),
         document.getElementById('triangle_tool')
     ].filter(Boolean);
+    const shapeColor = document.getElementById('shape_color');
+    const shapeOpacity = document.getElementById('shape_opacity');
     let activeTool;
 
     function deactivateTools() {
@@ -59,6 +61,8 @@
             type: activeTool,
             x: point.x,
             y: point.y,
+            color: shapeColor?.value || '#111827',
+            opacity: Math.min(1, Math.max(0, Number(shapeOpacity?.value ?? 100) / 100)),
             radius: 30 * sizeScale,
             width: 100 * point.scaleX,
             height: (activeTool === 'rectangle' ? 30 : 100) * point.scaleY
@@ -70,9 +74,11 @@
         context.filter = 'none';
         context.globalAlpha = 1;
         context.globalCompositeOperation = 'source-over';
-        context.fillStyle = '#111827';
 
         shapes.forEach(shape => {
+            context.fillStyle = shape.color || '#111827';
+            context.globalAlpha = shape.opacity ?? 1;
+
             if (shape.type === 'circle') {
                 context.beginPath();
                 context.arc(shape.x, shape.y, shape.radius, 0, Math.PI * 2);
@@ -101,7 +107,15 @@
         tool.addEventListener('click', () => toggleDrawingMode(tool));
     });
     editor.canvas.addEventListener('click', addShape);
-    window.addEventListener('photoeditor:clear', deactivateTools);
+    window.addEventListener('photoeditor:clear', () => {
+        deactivateTools();
+
+        [shapeColor, shapeOpacity].forEach(control => {
+            if (control) {
+                control.value = control.defaultValue;
+            }
+        });
+    });
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') {
             deactivateTools();
