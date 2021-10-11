@@ -14,6 +14,7 @@
     ].filter(Boolean);
     const shapeColor = document.getElementById('shape_color');
     const shapeOpacity = document.getElementById('shape_opacity');
+    const shapeSize = document.getElementById('shape_size');
     let activeTool;
 
     function deactivateTools() {
@@ -56,6 +57,10 @@
 
         const point = editor.toImagePoint(getMousePosition(event));
         const sizeScale = (point.scaleX + point.scaleY) / 2;
+        const selectedSize = Math.min(
+            2,
+            Math.max(0.1, Number(shapeSize?.value ?? 100) / 100)
+        );
 
         editor.addShape({
             type: activeTool,
@@ -63,9 +68,9 @@
             y: point.y,
             color: shapeColor?.value || '#111827',
             opacity: Math.min(1, Math.max(0, Number(shapeOpacity?.value ?? 100) / 100)),
-            radius: 30 * sizeScale,
-            width: 100 * point.scaleX,
-            height: (activeTool === 'rectangle' ? 30 : 100) * point.scaleY
+            radius: 30 * sizeScale * selectedSize,
+            width: 100 * point.scaleX * selectedSize,
+            height: (activeTool === 'rectangle' ? 30 : 100) * point.scaleY * selectedSize
         });
     }
 
@@ -110,7 +115,7 @@
     window.addEventListener('photoeditor:clear', () => {
         deactivateTools();
 
-        [shapeColor, shapeOpacity].forEach(control => {
+        [shapeColor, shapeOpacity, shapeSize].forEach(control => {
             if (control) {
                 control.value = control.defaultValue;
             }
