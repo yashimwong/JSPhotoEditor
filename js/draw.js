@@ -15,7 +15,14 @@
     const shapeColor = document.getElementById('shape_color');
     const shapeOpacity = document.getElementById('shape_opacity');
     const shapeSize = document.getElementById('shape_size');
+    const removeLastShapeButton = document.getElementById('remove_last_shape');
     let activeTool;
+
+    function updateRemoveButton() {
+        if (removeLastShapeButton) {
+            removeLastShapeButton.disabled = editor.getShapeCount() === 0;
+        }
+    }
 
     function deactivateTools() {
         activeTool = undefined;
@@ -111,6 +118,9 @@
     tools.forEach(tool => {
         tool.addEventListener('click', () => toggleDrawingMode(tool));
     });
+    removeLastShapeButton?.addEventListener('click', () => {
+        editor.removeLastShape();
+    });
     editor.canvas.addEventListener('click', addShape);
     window.addEventListener('photoeditor:clear', () => {
         deactivateTools();
@@ -121,10 +131,24 @@
             }
         });
     });
+    window.addEventListener('photoeditor:shapeschange', updateRemoveButton);
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') {
             deactivateTools();
         }
+
+        const editingFormControl = ['INPUT', 'SELECT', 'TEXTAREA'].includes(
+            event.target.tagName
+        );
+
+        if (
+            !editingFormControl &&
+            (event.key === 'Delete' || event.key === 'Backspace') &&
+            editor.removeLastShape()
+        ) {
+            event.preventDefault();
+        }
     });
     editor.setShapeRenderer(renderShapes);
+    updateRemoveButton();
 })();
