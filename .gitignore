@@ -72,7 +72,6 @@ fabric.properties
 
 #node
 /node_modules
-package-lock.json
 tailwind.config.js
 base.css
 .idea/vcs.xml

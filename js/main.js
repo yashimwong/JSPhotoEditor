@@ -136,6 +136,7 @@
 
         resizeCanvas();
         renderImage();
+        notifyShapesChanged();
     }
 
     function undo() {
@@ -160,6 +161,14 @@
         return true;
     }
 
+    function notifyShapesChanged() {
+        window.dispatchEvent(
+            new CustomEvent('photoeditor:shapeschange', {
+                detail: { count: shapes.length }
+            })
+        );
+    }
+
     function resetState() {
         state.brightness = 1;
         state.contrast = 1;
@@ -181,6 +190,7 @@
         });
 
         resizeCanvas();
+        notifyShapesChanged();
         window.dispatchEvent(new Event('photoeditor:clear'));
     }
 
@@ -599,11 +609,26 @@
                 recordHistory();
                 shapes.push(shape);
                 renderImage();
+                notifyShapesChanged();
             }
         },
         canvas,
+        getShapeCount() {
+            return shapes.length;
+        },
         hasImage() {
             return Boolean(image);
+        },
+        removeLastShape() {
+            if (!image || shapes.length === 0) {
+                return false;
+            }
+
+            recordHistory();
+            shapes.pop();
+            renderImage();
+            notifyShapesChanged();
+            return true;
         },
         render: renderImage,
         setShapeRenderer(renderer) {
