@@ -1,20 +1,54 @@
 {
   "name": "js-photo-editor",
-  "version": "1.0.0",
-  "private": true,
+  "version": "2.0.0",
+  "description": "A framework-independent canvas photo editor for the browser",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yashimwong/JSPhotoEditor.git"
+  },
+  "homepage": "https://github.com/yashimwong/JSPhotoEditor#readme",
   "engines": {
     "node": ">=20.19.0"
   },
   "scripts": {
-    "check": "npm run lint && npm test",
-    "lint": "eslint js tests *.config.js",
-    "test": "vitest run"
+    "build": "tsc --project tsconfig.build.json",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "dev": "vite",
+    "lint": "eslint src demo tests *.config.js",
+    "preview": "vite preview",
+    "prepack": "npm run build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run check"
   },
+  "keywords": [
+    "canvas",
+    "image-editor",
+    "photo-editor",
+    "typescript"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "eslint": "10.8.0",
     "globals": "17.7.0",
     "jsdom": "29.1.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.66.0",
+    "vite": "8.2.1",
     "vitest": "4.1.10"
   }
 }
