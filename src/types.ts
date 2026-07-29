@@ -96,3 +96,27 @@ export interface EditorHistoryEvent {
 }
 
 export interface EditorLoadEvent {
+    fileName: string;
+    height: number;
+    width: number;
+}
+
+export interface EditorRenderEvent {
+    height: number;
+    width: number;
+}
+
+export interface EditorEvents {
+    change: EditorChangeEvent;
+    clear: undefined;
+    historychange: EditorHistoryEvent;
+    load: EditorLoadEvent;
+    render: EditorRenderEvent;
+    shapeschange: EditorShape[];
+}
+
+export type EditorEventName = keyof EditorEvents;
+
+export type EditorEventListener<Name extends EditorEventName> = (
+    event: EditorEvents[Name]
+) => void;
