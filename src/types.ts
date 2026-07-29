@@ -72,3 +72,27 @@ export interface ExportOptions {
     fileName?: string;
     format?: ImageFormat;
     quality?: number;
+}
+
+export type EditorImageSource = Blob | string | CanvasImageSource;
+
+export interface JSPhotoEditorOptions {
+    canvas?: HTMLCanvasElement;
+    createImage?: () => HTMLImageElement;
+    createObjectURL?: (blob: Blob) => string;
+    historyLimit?: number;
+    revokeObjectURL?: (url: string) => void;
+}
+
+export interface EditorChangeEvent {
+    canRedo: boolean;
+    canUndo: boolean;
+    state: EditorState;
+}
+
+export interface EditorHistoryEvent {
+    canRedo: boolean;
+    canUndo: boolean;
+}
+
+export interface EditorLoadEvent {
