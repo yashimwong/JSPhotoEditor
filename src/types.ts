@@ -23,3 +23,27 @@ export interface Adjustments {
 }
 
 export interface ShapeBase {
+    id: string;
+    type: ShapeType;
+    x: number;
+    y: number;
+    color: string;
+    opacity: number;
+}
+
+export interface CircleShape extends ShapeBase {
+    type: 'circle';
+    radius: number;
+}
+
+export interface RectangleShape extends ShapeBase {
+    type: 'rectangle';
+    width: number;
+    height: number;
+}
+
+export interface TriangleShape extends ShapeBase {
+    type: 'triangle';
+    width: number;
+    height: number;
+}
