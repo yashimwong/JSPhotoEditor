@@ -47,3 +47,28 @@ export interface TriangleShape extends ShapeBase {
     width: number;
     height: number;
 }
+
+export type EditorShape = CircleShape | RectangleShape | TriangleShape;
+
+export type ShapeInput =
+    | Omit<CircleShape, 'id'> & { id?: string }
+    | Omit<RectangleShape, 'id'> & { id?: string }
+    | Omit<TriangleShape, 'id'> & { id?: string };
+
+export interface EditorState {
+    adjustments: Adjustments;
+    rotation: Rotation;
+    flipHorizontal: boolean;
+    flipVertical: boolean;
+    shapes: EditorShape[];
+}
+
+export interface LoadOptions {
+    crossOrigin?: string;
+    fileName?: string;
+}
+
+export interface ExportOptions {
+    fileName?: string;
+    format?: ImageFormat;
+    quality?: number;
