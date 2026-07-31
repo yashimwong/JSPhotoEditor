@@ -159,3 +159,29 @@ export class CanvasRenderer {
                         const sourceY = Math.min(
                             this.canvas.height - 1,
                             Math.max(0, y + kernelY)
+                        );
+                        const sourceOffset = (sourceY * this.canvas.width + sourceX) * 4;
+                        const weight = weights[(kernelY + 1) * 3 + kernelX + 1] ?? 0;
+
+                        sharpened[0] =
+                            (sharpened[0] ?? 0) + (source[sourceOffset] ?? 0) * weight;
+                        sharpened[1] =
+                            (sharpened[1] ?? 0) + (source[sourceOffset + 1] ?? 0) * weight;
+                        sharpened[2] =
+                            (sharpened[2] ?? 0) + (source[sourceOffset + 2] ?? 0) * weight;
+                    }
+                }
+
+                for (let channel = 0; channel < 3; channel += 1) {
+                    const original = source[destinationOffset + channel] ?? 0;
+                    destination[destinationOffset + channel] =
+                        (sharpened[channel] ?? 0) * strength + original * (1 - strength);
+                }
+
+                destination[destinationOffset + 3] = source[destinationOffset + 3] ?? 255;
+            }
+        }
+
+        this.context.putImageData(imageData, 0, 0);
+    }
+}
