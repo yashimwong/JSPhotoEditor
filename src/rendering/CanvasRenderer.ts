@@ -25,3 +25,30 @@ export class CanvasRenderer {
             this.canvas.width = width;
         }
 
+        if (this.canvas.height !== height) {
+            this.canvas.height = height;
+        }
+    }
+
+    render(
+        image: CanvasImageSource,
+        sourceWidth: number,
+        sourceHeight: number,
+        state: EditorState
+    ): void {
+        this.resize(sourceWidth, sourceHeight, state);
+        const { adjustments } = state;
+        const context = this.context;
+
+        context.save();
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        context.globalAlpha = 1;
+        context.globalCompositeOperation = 'source-over';
+        context.filter = [
+            `brightness(${adjustments.brightness})`,
+            `contrast(${adjustments.contrast})`,
+            `blur(${adjustments.blur}px)`,
+            `grayscale(${adjustments.grayscale})`,
+            `saturate(${adjustments.saturation})`
+        ].join(' ');
+        this.applyTransform(state);
