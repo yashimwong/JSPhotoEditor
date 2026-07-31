@@ -52,3 +52,30 @@ export class CanvasRenderer {
             `saturate(${adjustments.saturation})`
         ].join(' ');
         this.applyTransform(state);
+        context.drawImage(image, 0, 0, sourceWidth, sourceHeight);
+        context.restore();
+
+        this.applySharpen(adjustments.sharpen);
+
+        if (adjustments.overlayOpacity > 0) {
+            context.save();
+            context.filter = 'none';
+            context.globalAlpha = adjustments.overlayOpacity;
+            context.globalCompositeOperation = 'source-atop';
+            context.fillStyle = adjustments.overlayColor;
+            context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            context.restore();
+        }
+
+        context.save();
+        this.applyTransform(state);
+        renderShapes(context, state.shapes);
+        context.restore();
+    }
+
+    clear(): void {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvas.width = 0;
+        this.canvas.height = 0;
+    }
+
