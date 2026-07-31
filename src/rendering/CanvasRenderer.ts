@@ -105,3 +105,30 @@ export class CanvasRenderer {
         return transformed;
     }
 
+    private applyTransform(state: EditorState): void {
+        const context = this.context;
+
+        if (state.flipHorizontal) {
+            context.translate(this.canvas.width, 0);
+            context.scale(-1, 1);
+        }
+
+        if (state.flipVertical) {
+            context.translate(0, this.canvas.height);
+            context.scale(1, -1);
+        }
+
+        if (state.rotation === 90) {
+            context.translate(this.canvas.width, 0);
+            context.rotate(Math.PI / 2);
+        } else if (state.rotation === 180) {
+            context.translate(this.canvas.width, this.canvas.height);
+            context.rotate(Math.PI);
+        } else if (state.rotation === 270) {
+            context.translate(0, this.canvas.height);
+            context.rotate(-Math.PI / 2);
+        }
+    }
+
+    private applySharpen(strength: number): void {
+        if (strength <= 0 || this.canvas.width === 0 || this.canvas.height === 0) {
