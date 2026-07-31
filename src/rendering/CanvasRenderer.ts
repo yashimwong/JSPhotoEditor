@@ -132,3 +132,30 @@ export class CanvasRenderer {
 
     private applySharpen(strength: number): void {
         if (strength <= 0 || this.canvas.width === 0 || this.canvas.height === 0) {
+            return;
+        }
+
+        const imageData = this.context.getImageData(
+            0,
+            0,
+            this.canvas.width,
+            this.canvas.height
+        );
+        const source = new Uint8ClampedArray(imageData.data);
+        const destination = imageData.data;
+        const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+
+        for (let y = 0; y < this.canvas.height; y += 1) {
+            for (let x = 0; x < this.canvas.width; x += 1) {
+                const destinationOffset = (y * this.canvas.width + x) * 4;
+                const sharpened = [0, 0, 0];
+
+                for (let kernelY = -1; kernelY <= 1; kernelY += 1) {
+                    for (let kernelX = -1; kernelX <= 1; kernelX += 1) {
+                        const sourceX = Math.min(
+                            this.canvas.width - 1,
+                            Math.max(0, x + kernelX)
+                        );
+                        const sourceY = Math.min(
+                            this.canvas.height - 1,
+                            Math.max(0, y + kernelY)
