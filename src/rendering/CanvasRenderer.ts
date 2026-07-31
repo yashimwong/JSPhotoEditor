@@ -79,3 +79,29 @@ export class CanvasRenderer {
         this.canvas.height = 0;
     }
 
+    toImagePoint(
+        point: Point,
+        sourceWidth: number,
+        sourceHeight: number,
+        state: EditorState
+    ): Point {
+        const transformed = {
+            x: state.flipHorizontal ? this.canvas.width - point.x : point.x,
+            y: state.flipVertical ? this.canvas.height - point.y : point.y
+        };
+
+        if (state.rotation === 90) {
+            return { x: transformed.y, y: sourceHeight - transformed.x };
+        }
+
+        if (state.rotation === 180) {
+            return { x: sourceWidth - transformed.x, y: sourceHeight - transformed.y };
+        }
+
+        if (state.rotation === 270) {
+            return { x: sourceWidth - transformed.y, y: transformed.x };
+        }
+
+        return transformed;
+    }
+
