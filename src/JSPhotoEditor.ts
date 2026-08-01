@@ -91,3 +91,34 @@ function fileNameFromUrl(url: string): string {
         return 'image';
     }
 }
+
+export class JSPhotoEditor {
+    readonly canvas: HTMLCanvasElement;
+    readonly #createImage: () => HTMLImageElement;
+    readonly #createObjectURL: (blob: Blob) => string;
+    readonly #events = new EventEmitter<EditorEvents>();
+    readonly #history: HistoryManager<EditorState>;
+    readonly #renderer: CanvasRenderer;
+    readonly #revokeObjectURL: (url: string) => void;
+    readonly #ownedObjectUrls = new Set<string>();
+    #disposed = false;
+    #fileName = 'image';
+    #image: CanvasImageSource | undefined;
+    #loadVersion = 0;
+    #shapeSequence = 0;
+    #sourceHeight = 0;
+    #sourceWidth = 0;
+    #state = createDefaultState();
+
+    constructor(options: JSPhotoEditorOptions | HTMLCanvasElement = {}) {
+        const normalizedOptions = isCanvas(options) ? { canvas: options } : options;
+        const canvas = normalizedOptions.canvas ?? globalThis.document?.createElement('canvas');
+
+        if (!canvas) {
+            throw new Error('A canvas is required outside a browser environment');
+        }
+
+        const windowReference = canvas.ownerDocument?.defaultView;
+        const ImageConstructor = windowReference?.Image ?? globalThis.Image;
+        const urlReference = windowReference?.URL ?? globalThis.URL;
+
