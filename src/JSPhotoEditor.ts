@@ -60,3 +60,34 @@ function sourceDimensions(source: CanvasImageSource): { height: number; width: n
         naturalWidth?: number;
         videoHeight?: number;
         videoWidth?: number;
+        width?: number;
+    };
+    const width = dimensions.naturalWidth ?? dimensions.videoWidth ?? dimensions.width;
+    const height = dimensions.naturalHeight ?? dimensions.videoHeight ?? dimensions.height;
+
+    if (
+        typeof width !== 'number' ||
+        typeof height !== 'number' ||
+        !Number.isFinite(width) ||
+        !Number.isFinite(height) ||
+        width <= 0 ||
+        height <= 0
+    ) {
+        throw new InvalidImageError('The image source has no usable dimensions');
+    }
+
+    return { height, width };
+}
+
+function fileStem(name: string): string {
+    const value = name.split(/[\\/]/).pop()?.replace(/\.[^./\\]+$/, '').trim();
+    return value || 'image';
+}
+
+function fileNameFromUrl(url: string): string {
+    try {
+        return fileStem(decodeURIComponent(new URL(url, 'http://localhost').pathname));
+    } catch {
+        return 'image';
+    }
+}
