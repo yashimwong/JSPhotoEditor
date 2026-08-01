@@ -122,3 +122,34 @@ export class JSPhotoEditor {
         const ImageConstructor = windowReference?.Image ?? globalThis.Image;
         const urlReference = windowReference?.URL ?? globalThis.URL;
 
+        if (!normalizedOptions.createImage && !ImageConstructor) {
+            throw new Error('An image factory is required in this environment');
+        }
+
+        this.canvas = canvas;
+        this.#renderer = new CanvasRenderer(canvas);
+        this.#history = new HistoryManager(normalizedOptions.historyLimit ?? 50, cloneState);
+        this.#createImage =
+            normalizedOptions.createImage ?? (() => new ImageConstructor() as HTMLImageElement);
+        this.#createObjectURL =
+            normalizedOptions.createObjectURL ??
+            ((blob: Blob) => {
+                if (!urlReference?.createObjectURL) {
+                    throw new Error('Object URLs are not supported in this environment');
+                }
+
+                return urlReference.createObjectURL(blob);
+            });
+        this.#revokeObjectURL =
+            normalizedOptions.revokeObjectURL ??
+            ((url: string) => {
+                urlReference?.revokeObjectURL(url);
+            });
+    }
+
+    get canUndo(): boolean {
+        return this.#history.canUndo;
+    }
+
+    get canRedo(): boolean {
+        return this.#history.canRedo;
