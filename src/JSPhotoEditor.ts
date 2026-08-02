@@ -153,3 +153,34 @@ export class JSPhotoEditor {
 
     get canRedo(): boolean {
         return this.#history.canRedo;
+    }
+
+    get fileName(): string {
+        return this.#fileName;
+    }
+
+    get state(): EditorState {
+        return cloneState(this.#state);
+    }
+
+    get shapeCount(): number {
+        return this.#state.shapes.length;
+    }
+
+    on<Name extends EditorEventName>(
+        name: Name,
+        listener: EditorEventListener<Name>
+    ): () => void {
+        this.#assertActive();
+        return this.#events.on(name, listener);
+    }
+
+    off<Name extends EditorEventName>(name: Name, listener: EditorEventListener<Name>): void {
+        this.#events.off(name, listener);
+    }
+
+    async load(source: EditorImageSource, options: LoadOptions = {}): Promise<void> {
+        this.#assertActive();
+        const version = ++this.#loadVersion;
+        let image: CanvasImageSource;
+        let objectUrl: string | undefined;
