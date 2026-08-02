@@ -277,3 +277,33 @@ export class JSPhotoEditor {
     }
 
     flip(axis: FlipAxis): void {
+        this.#requireImage();
+        this.#mutate(() => {
+            if (axis === 'horizontal') {
+                this.#state.flipHorizontal = !this.#state.flipHorizontal;
+            } else {
+                this.#state.flipVertical = !this.#state.flipVertical;
+            }
+        });
+    }
+
+    flipHorizontal(): void {
+        this.flip('horizontal');
+    }
+
+    flipVertical(): void {
+        this.flip('vertical');
+    }
+
+    addShape(input: ShapeInput): EditorShape {
+        this.#requireImage();
+        const shape = this.#normalizeShape(input);
+        this.#mutate(() => {
+            this.#state.shapes.push(shape);
+        });
+        this.#emitShapes();
+        return cloneShape(shape);
+    }
+
+    updateShape(id: string, update: Partial<ShapeInput>): EditorShape | undefined {
+        this.#requireImage();
