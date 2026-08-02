@@ -184,3 +184,34 @@ export class JSPhotoEditor {
         const version = ++this.#loadVersion;
         let image: CanvasImageSource;
         let objectUrl: string | undefined;
+        let nextFileName = options.fileName;
+
+        if (typeof source === 'string') {
+            image = await this.#loadImageElement(source, options.crossOrigin);
+            nextFileName ??= fileNameFromUrl(source);
+        } else if (isBlob(source)) {
+            objectUrl = this.#createObjectURL(source);
+            this.#ownedObjectUrls.add(objectUrl);
+            nextFileName ??= 'name' in source && typeof source.name === 'string' ? source.name : 'image';
+
+            try {
+                image = await this.#loadImageElement(objectUrl);
+            } catch (error) {
+                this.#releaseObjectUrl(objectUrl);
+                throw error;
+            }
+        } else {
+            image = source;
+        }
+
+        if (version !== this.#loadVersion || this.#disposed) {
+            if (objectUrl) {
+                this.#releaseObjectUrl(objectUrl);
+            }
+            return;
+        }
+
+        const dimensions = sourceDimensions(image);
+        this.#releaseObjectUrlsExcept(objectUrl);
+        this.#image = image;
+        this.#sourceWidth = dimensions.width;
