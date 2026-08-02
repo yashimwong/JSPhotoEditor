@@ -307,3 +307,34 @@ export class JSPhotoEditor {
 
     updateShape(id: string, update: Partial<ShapeInput>): EditorShape | undefined {
         this.#requireImage();
+        const index = this.#state.shapes.findIndex(shape => shape.id === id);
+
+        if (index < 0) {
+            return undefined;
+        }
+
+        const shape = this.#normalizeShape({
+            ...this.#state.shapes[index],
+            ...update,
+            id
+        } as ShapeInput);
+        this.#mutate(() => {
+            this.#state.shapes[index] = shape;
+        });
+        this.#emitShapes();
+        return cloneShape(shape);
+    }
+
+    removeShape(id?: string): EditorShape | undefined {
+        this.#requireImage();
+        const index = id
+            ? this.#state.shapes.findIndex(shape => shape.id === id)
+            : this.#state.shapes.length - 1;
+
+        if (index < 0) {
+            return undefined;
+        }
+
+        let removed: EditorShape | undefined;
+        this.#mutate(() => {
+            [removed] = this.#state.shapes.splice(index, 1);
