@@ -215,3 +215,34 @@ export class JSPhotoEditor {
         this.#releaseObjectUrlsExcept(objectUrl);
         this.#image = image;
         this.#sourceWidth = dimensions.width;
+        this.#sourceHeight = dimensions.height;
+        this.#fileName = fileStem(nextFileName ?? 'image');
+        this.#state = createDefaultState();
+        this.#history.clear();
+        this.render();
+        this.#emitHistory();
+        this.#events.emit('load', {
+            fileName: this.#fileName,
+            height: this.#sourceHeight,
+            width: this.#sourceWidth
+        });
+        this.#emitChange();
+    }
+
+    hasImage(): boolean {
+        return Boolean(this.#image);
+    }
+
+    setAdjustment<Name extends keyof Adjustments>(
+        name: Name,
+        value: Adjustments[Name]
+    ): void {
+        this.setAdjustments({ [name]: value });
+    }
+
+    setAdjustments(adjustments: Partial<Adjustments>): void {
+        this.#requireImage();
+        const next = { ...this.#state.adjustments, ...adjustments };
+        next.brightness = Math.max(0, finite(next.brightness, 'brightness'));
+        next.contrast = Math.max(0, finite(next.contrast, 'contrast'));
+        next.blur = Math.max(0, finite(next.blur, 'blur'));
