@@ -246,3 +246,34 @@ export class JSPhotoEditor {
         next.brightness = Math.max(0, finite(next.brightness, 'brightness'));
         next.contrast = Math.max(0, finite(next.contrast, 'contrast'));
         next.blur = Math.max(0, finite(next.blur, 'blur'));
+        next.sharpen = clamp(finite(next.sharpen, 'sharpen'), 0, 1);
+        next.grayscale = clamp(finite(next.grayscale, 'grayscale'), 0, 1);
+        next.saturation = Math.max(0, finite(next.saturation, 'saturation'));
+        next.overlayOpacity = clamp(finite(next.overlayOpacity, 'overlayOpacity'), 0, 1);
+
+        this.#mutate(() => {
+            this.#state.adjustments = next;
+        });
+    }
+
+    rotate(degrees: number): void {
+        this.#requireImage();
+
+        if (!Number.isInteger(degrees) || degrees % 90 !== 0) {
+            throw new RangeError('Rotation must be a multiple of 90 degrees');
+        }
+
+        this.#mutate(() => {
+            this.#state.rotation = ((this.#state.rotation + degrees + 3600) % 360) as Rotation;
+        });
+    }
+
+    rotateLeft(): void {
+        this.rotate(-90);
+    }
+
+    rotateRight(): void {
+        this.rotate(90);
+    }
+
+    flip(axis: FlipAxis): void {
