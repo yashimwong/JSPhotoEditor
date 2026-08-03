@@ -462,3 +462,34 @@ export class JSPhotoEditor {
                         resolve(blob);
                     } else {
                         reject(new Error('The canvas could not be exported'));
+                    }
+                },
+                mimeTypes[format],
+                format === 'png' ? undefined : quality
+            );
+        });
+    }
+
+    download(options: ExportOptions = {}): string {
+        const format = options.format ?? 'png';
+        const documentReference = this.canvas.ownerDocument ?? globalThis.document;
+
+        if (!documentReference) {
+            throw new Error('Downloads require a browser document');
+        }
+
+        const name = fileStem(options.fileName ?? `${this.#fileName}_jsphotoeditor`);
+        const link = documentReference.createElement('a');
+        link.href = this.toDataURL(options);
+        link.download = `${name}.${format}`;
+        documentReference.body.appendChild(link);
+        link.click();
+        link.remove();
+        return link.download;
+    }
+
+    clear(): void {
+        this.#assertActive();
+        this.#loadVersion += 1;
+        this.#releaseObjectUrlsExcept();
+        this.#image = undefined;
