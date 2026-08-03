@@ -369,3 +369,34 @@ export class JSPhotoEditor {
         return this.shapeCount;
     }
 
+    toImagePoint(point: Point): Point {
+        this.#requireImage();
+        return this.#renderer.toImagePoint(
+            point,
+            this.#sourceWidth,
+            this.#sourceHeight,
+            this.#state
+        );
+    }
+
+    reset(): void {
+        this.#requireImage();
+        this.#mutate(() => {
+            this.#state = createDefaultState();
+        });
+        this.#emitShapes();
+    }
+
+    undo(): boolean {
+        this.#requireImage();
+        const previous = this.#history.undo(this.#state);
+
+        if (!previous) {
+            return false;
+        }
+
+        this.#state = previous;
+        this.render();
+        this.#emitHistory();
+        this.#emitShapes();
+        this.#emitChange();
