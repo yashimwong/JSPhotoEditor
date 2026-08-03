@@ -338,3 +338,34 @@ export class JSPhotoEditor {
         let removed: EditorShape | undefined;
         this.#mutate(() => {
             [removed] = this.#state.shapes.splice(index, 1);
+        });
+        this.#emitShapes();
+        return removed ? cloneShape(removed) : undefined;
+    }
+
+    removeLastShape(): boolean {
+        return Boolean(this.removeShape());
+    }
+
+    clearShapes(): boolean {
+        this.#requireImage();
+
+        if (this.#state.shapes.length === 0) {
+            return false;
+        }
+
+        this.#mutate(() => {
+            this.#state.shapes = [];
+        });
+        this.#emitShapes();
+        return true;
+    }
+
+    getShapes(): EditorShape[] {
+        return this.#state.shapes.map(cloneShape);
+    }
+
+    getShapeCount(): number {
+        return this.shapeCount;
+    }
+
