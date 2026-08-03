@@ -493,3 +493,34 @@ export class JSPhotoEditor {
         this.#loadVersion += 1;
         this.#releaseObjectUrlsExcept();
         this.#image = undefined;
+        this.#sourceWidth = 0;
+        this.#sourceHeight = 0;
+        this.#fileName = 'image';
+        this.#state = createDefaultState();
+        this.#history.clear();
+        this.#renderer.clear();
+        this.#emitHistory();
+        this.#emitShapes();
+        this.#events.emit('clear', undefined);
+        this.#emitChange();
+    }
+
+    dispose(): void {
+        if (this.#disposed) {
+            return;
+        }
+
+        this.clear();
+        this.#disposed = true;
+        this.#events.clear();
+    }
+
+    #assertActive(): void {
+        if (this.#disposed) {
+            throw new EditorDisposedError();
+        }
+    }
+
+    #requireImage(): void {
+        this.#assertActive();
+
