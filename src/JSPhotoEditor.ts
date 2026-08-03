@@ -400,3 +400,34 @@ export class JSPhotoEditor {
         this.#emitHistory();
         this.#emitShapes();
         this.#emitChange();
+        return true;
+    }
+
+    redo(): boolean {
+        this.#requireImage();
+        const next = this.#history.redo(this.#state);
+
+        if (!next) {
+            return false;
+        }
+
+        this.#state = next;
+        this.render();
+        this.#emitHistory();
+        this.#emitShapes();
+        this.#emitChange();
+        return true;
+    }
+
+    render(): void {
+        this.#assertActive();
+
+        if (!this.#image) {
+            return;
+        }
+
+        this.#renderer.render(
+            this.#image,
+            this.#sourceWidth,
+            this.#sourceHeight,
+            this.#state
