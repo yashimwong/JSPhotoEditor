@@ -431,3 +431,34 @@ export class JSPhotoEditor {
             this.#sourceWidth,
             this.#sourceHeight,
             this.#state
+        );
+        this.#events.emit('render', {
+            height: this.canvas.height,
+            width: this.canvas.width
+        });
+    }
+
+    toDataURL(options: Omit<ExportOptions, 'fileName'> = {}): string {
+        this.#requireImage();
+        const format = options.format ?? 'png';
+        const quality = clamp(options.quality ?? 0.92, 0, 1);
+
+        if (format === 'jpeg' || format === 'webp') {
+            return this.canvas.toDataURL(mimeTypes[format], quality);
+        }
+
+        return this.canvas.toDataURL(mimeTypes[format]);
+    }
+
+    toBlob(options: Omit<ExportOptions, 'fileName'> = {}): Promise<Blob> {
+        this.#requireImage();
+        const format = options.format ?? 'png';
+        const quality = clamp(options.quality ?? 0.92, 0, 1);
+
+        return new Promise((resolve, reject) => {
+            this.canvas.toBlob(
+                blob => {
+                    if (blob) {
+                        resolve(blob);
+                    } else {
+                        reject(new Error('The canvas could not be exported'));
