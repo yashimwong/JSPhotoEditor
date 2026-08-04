@@ -586,3 +586,33 @@ export class JSPhotoEditor {
             canRedo: this.canRedo,
             canUndo: this.canUndo,
             state: this.state
+        });
+    }
+
+    #emitHistory(): void {
+        this.#events.emit('historychange', {
+            canRedo: this.canRedo,
+            canUndo: this.canUndo
+        });
+    }
+
+    #emitShapes(): void {
+        this.#events.emit('shapeschange', this.getShapes());
+    }
+
+    #releaseObjectUrl(url: string): void {
+        if (!this.#ownedObjectUrls.delete(url)) {
+            return;
+        }
+
+        this.#revokeObjectURL(url);
+    }
+
+    #releaseObjectUrlsExcept(exception?: string): void {
+        for (const url of [...this.#ownedObjectUrls]) {
+            if (url !== exception) {
+                this.#releaseObjectUrl(url);
+            }
+        }
+    }
+}
