@@ -524,3 +524,34 @@ export class JSPhotoEditor {
     #requireImage(): void {
         this.#assertActive();
 
+        if (!this.#image) {
+            throw new MissingImageError();
+        }
+    }
+
+    async #loadImageElement(source: string, crossOrigin?: string): Promise<HTMLImageElement> {
+        const image = this.#createImage();
+
+        if (crossOrigin !== undefined) {
+            image.crossOrigin = crossOrigin;
+        }
+
+        return new Promise((resolve, reject) => {
+            image.onload = () => resolve(image);
+            image.onerror = () => reject(new InvalidImageError());
+            image.src = source;
+        });
+    }
+
+    #mutate(change: () => void): void {
+        this.#history.record(this.#state);
+        change();
+        this.render();
+        this.#emitHistory();
+        this.#emitChange();
+    }
+
+    #normalizeShape(input: ShapeInput): EditorShape {
+        const base = {
+            color: input.color || '#111827',
+            id: input.id || `shape-${++this.#shapeSequence}`,
