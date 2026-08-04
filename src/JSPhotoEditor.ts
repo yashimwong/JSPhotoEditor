@@ -555,3 +555,34 @@ export class JSPhotoEditor {
         const base = {
             color: input.color || '#111827',
             id: input.id || `shape-${++this.#shapeSequence}`,
+            opacity: clamp(finite(input.opacity, 'shape opacity'), 0, 1),
+            type: input.type,
+            x: finite(input.x, 'shape x'),
+            y: finite(input.y, 'shape y')
+        };
+
+        if (input.type === 'circle') {
+            return {
+                ...base,
+                radius: Math.max(0, finite(input.radius, 'shape radius')),
+                type: 'circle'
+            };
+        }
+
+        const dimensions = {
+            height: Math.max(0, finite(input.height, 'shape height')),
+            width: Math.max(0, finite(input.width, 'shape width'))
+        };
+
+        if (input.type === 'rectangle') {
+            return { ...base, ...dimensions, type: 'rectangle' };
+        }
+
+        return { ...base, ...dimensions, type: 'triangle' };
+    }
+
+    #emitChange(): void {
+        this.#events.emit('change', {
+            canRedo: this.canRedo,
+            canUndo: this.canUndo,
+            state: this.state
