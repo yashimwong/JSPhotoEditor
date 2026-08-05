@@ -46,3 +46,27 @@ export function createContext(): ContextMock {
         closePath: vi.fn(),
         drawFilters,
         drawImage: vi.fn(() => drawFilters.push(context.filter)),
+        fill: vi.fn(),
+        fillRect: vi.fn(),
+        fillStyle: '#000000',
+        filter: 'none',
+        getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(pixels) })),
+        globalAlpha: 1,
+        globalCompositeOperation: 'source-over',
+        lineTo: vi.fn(),
+        moveTo: vi.fn(),
+        putImageData: vi.fn(),
+        restore: vi.fn(),
+        rotate: vi.fn(),
+        save: vi.fn(),
+        scale: vi.fn(),
+        translate: vi.fn()
+    };
+    return context;
+}
+
+export function createHarness(options: Omit<JSPhotoEditorOptions, 'canvas'> = {}): EditorHarness {
+    const canvas = document.createElement('canvas');
+    const context = createContext();
+    const toDataURL = vi.fn(() => 'data:image/mock;base64,image');
+    const toBlob = vi.fn((callback: BlobCallback, type?: string) => {
