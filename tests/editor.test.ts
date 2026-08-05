@@ -84,3 +84,46 @@ describe('image loading', () => {
                 return url;
             },
             revokeObjectURL: url => revoked.push(url)
+        });
+
+        await harness.editor.load(new File(['one'], 'one.png', { type: 'image/png' }));
+        await harness.editor.load(new File(['two'], 'two.png', { type: 'image/png' }));
+
+        expect(created).toEqual(['blob:image-1', 'blob:image-2']);
+        expect(revoked).toEqual(['blob:image-1']);
+        expect(harness.editor.fileName).toBe('two');
+    });
+
+    it('releases an object URL after image failure', async () => {
+        const revoked = vi.fn();
+        const harness = createHarness({
+            createImage: () => {
+                const image: {
+                    onerror: ((event: Event) => void) | null;
+                    onload: ((event: Event) => void) | null;
+                    src: string;
+                } = {
+                    onerror: null,
+                    onload: null,
+                    set src(value: string) {
+                        queueMicrotask(() => this.onerror?.(new Event('error')));
+                    }
+                };
+                return image as unknown as HTMLImageElement;
+            },
+            createObjectURL: () => 'blob:failed',
+            revokeObjectURL: revoked
+        });
+
+        await expect(
+            harness.editor.load(new Blob(['bad'], { type: 'image/png' }))
+        ).rejects.toBeInstanceOf(InvalidImageError);
+        expect(revoked).toHaveBeenCalledWith('blob:failed');
+    });
+
+    it('rejects sources without dimensions', async () => {
+        const harness = createHarness();
+        await expect(
+            harness.editor.load({ height: 0, width: 0 } as CanvasImageSource)
+        ).rejects.toBeInstanceOf(InvalidImageError);
+    });
