@@ -70,3 +70,26 @@ export function createHarness(options: Omit<JSPhotoEditorOptions, 'canvas'> = {}
     const context = createContext();
     const toDataURL = vi.fn(() => 'data:image/mock;base64,image');
     const toBlob = vi.fn((callback: BlobCallback, type?: string) => {
+        callback(new Blob(['image'], type ? { type } : undefined));
+    });
+
+    Object.defineProperties(canvas, {
+        getContext: { configurable: true, value: vi.fn(() => context) },
+        toBlob: { configurable: true, value: toBlob },
+        toDataURL: { configurable: true, value: toDataURL }
+    });
+    document.body.appendChild(canvas);
+
+    return {
+        canvas,
+        context,
+        editor: new JSPhotoEditor({ ...options, canvas }),
+        source: { height: 3, width: 4 } as CanvasImageSource,
+        toBlob,
+        toDataURL
+    };
+}
+
+export async function loadHarness(harness: EditorHarness, fileName = 'holiday.jpeg'): Promise<void> {
+    await harness.editor.load(harness.source, { fileName });
+}
