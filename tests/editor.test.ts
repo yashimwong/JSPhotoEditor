@@ -170,3 +170,46 @@ describe('adjustments', () => {
         expect(harness.context.getImageData).toHaveBeenCalledWith(0, 0, 4, 3);
         expect(harness.context.putImageData).toHaveBeenCalled();
     });
+
+    it('clamps bounded adjustments', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.setAdjustments({ grayscale: 2, overlayOpacity: -1, sharpen: 4 });
+
+        expect(harness.editor.state.adjustments).toMatchObject({
+            grayscale: 1,
+            overlayOpacity: 0,
+            sharpen: 1
+        });
+    });
+
+    it('rejects non-finite adjustments', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        expect(() => harness.editor.setAdjustment('blur', Number.NaN)).toThrow(TypeError);
+    });
+});
+
+describe('transforms', () => {
+    it('rotates right and swaps canvas dimensions', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.rotateRight();
+
+        expect(harness.canvas.width).toBe(3);
+        expect(harness.canvas.height).toBe(4);
+        expect(harness.context.translate).toHaveBeenCalledWith(3, 0);
+        expect(harness.context.rotate).toHaveBeenCalledWith(Math.PI / 2);
+    });
+
+    it('rotates left', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.rotateLeft();
+
+        expect(harness.editor.state.rotation).toBe(270);
+        expect(harness.context.rotate).toHaveBeenCalledWith(-Math.PI / 2);
+    });
