@@ -213,3 +213,45 @@ describe('transforms', () => {
         expect(harness.editor.state.rotation).toBe(270);
         expect(harness.context.rotate).toHaveBeenCalledWith(-Math.PI / 2);
     });
+
+    it('rejects arbitrary rotation angles', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        expect(() => harness.editor.rotate(45)).toThrow(RangeError);
+    });
+
+    it('flips horizontally and vertically', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.flipHorizontal();
+        harness.editor.flipVertical();
+
+        expect(harness.editor.state.flipHorizontal).toBe(true);
+        expect(harness.editor.state.flipVertical).toBe(true);
+        expect(harness.context.scale).toHaveBeenCalledWith(-1, 1);
+        expect(harness.context.scale).toHaveBeenCalledWith(1, -1);
+    });
+
+    it('maps displayed points into source coordinates', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        harness.editor.rotateRight();
+
+        expect(harness.editor.toImagePoint({ x: 1, y: 2 })).toEqual({ x: 2, y: 2 });
+    });
+});
+
+describe('shapes', () => {
+    it('draws circles', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        const shape = harness.editor.addShape({
+            color: '#111827',
+            opacity: 0.8,
+            radius: 30,
+            type: 'circle',
+            x: 2,
+            y: 1
+        });
