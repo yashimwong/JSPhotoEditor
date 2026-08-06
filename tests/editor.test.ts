@@ -298,3 +298,46 @@ describe('shapes', () => {
     it('updates shapes by id', async () => {
         const harness = createHarness();
         await loadHarness(harness);
+        const shape = harness.editor.addShape({
+            color: '#111827',
+            opacity: 1,
+            radius: 1,
+            type: 'circle',
+            x: 1,
+            y: 1
+        });
+
+        const updated = harness.editor.updateShape(shape.id, { radius: 2 });
+
+        expect(updated).toMatchObject({ id: shape.id, radius: 2 });
+        expect(harness.editor.updateShape('missing', { radius: 3 })).toBeUndefined();
+    });
+
+    it('removes a selected shape', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        const first = harness.editor.addShape({
+            color: '#111827',
+            opacity: 1,
+            radius: 1,
+            type: 'circle',
+            x: 1,
+            y: 1
+        });
+        harness.editor.addShape({
+            color: '#111827',
+            opacity: 1,
+            radius: 1,
+            type: 'circle',
+            x: 2,
+            y: 2
+        });
+
+        expect(harness.editor.removeShape(first.id)?.id).toBe(first.id);
+        expect(harness.editor.shapeCount).toBe(1);
+    });
+
+    it('clears every shape as one operation', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        harness.editor.addShape({
