@@ -341,3 +341,46 @@ describe('shapes', () => {
         const harness = createHarness();
         await loadHarness(harness);
         harness.editor.addShape({
+            color: '#111827',
+            opacity: 1,
+            radius: 1,
+            type: 'circle',
+            x: 1,
+            y: 1
+        });
+
+        expect(harness.editor.clearShapes()).toBe(true);
+        expect(harness.editor.clearShapes()).toBe(false);
+        expect(harness.editor.shapeCount).toBe(0);
+    });
+
+    it('returns defensive shape copies', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        harness.editor.addShape({
+            color: '#111827',
+            opacity: 1,
+            radius: 1,
+            type: 'circle',
+            x: 1,
+            y: 1
+        });
+        const shapes = harness.editor.getShapes();
+        shapes.length = 0;
+        expect(harness.editor.shapeCount).toBe(1);
+    });
+});
+
+describe('history', () => {
+    it('undoes and redoes adjustments', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        harness.editor.setAdjustment('brightness', 1.4);
+
+        expect(harness.editor.undo()).toBe(true);
+        expect(harness.editor.state.adjustments.brightness).toBe(1);
+        expect(harness.editor.redo()).toBe(true);
+        expect(harness.editor.state.adjustments.brightness).toBe(1.4);
+    });
+
+    it('restores shapes through history', async () => {
