@@ -255,3 +255,46 @@ describe('shapes', () => {
             x: 2,
             y: 1
         });
+
+        expect(shape.id).toBe('shape-1');
+        expect(harness.context.arc).toHaveBeenCalledWith(2, 1, 30, 0, Math.PI * 2);
+    });
+
+    it('draws rectangles', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.addShape({
+            color: '#111827',
+            height: 2,
+            opacity: 1,
+            type: 'rectangle',
+            width: 4,
+            x: 2,
+            y: 1
+        });
+
+        expect(harness.context.fillRect).toHaveBeenCalledWith(0, 0, 4, 2);
+    });
+
+    it('draws triangles', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.addShape({
+            color: '#111827',
+            height: 2,
+            opacity: 1,
+            type: 'triangle',
+            width: 4,
+            x: 2,
+            y: 1
+        });
+
+        expect(harness.context.moveTo).toHaveBeenCalledWith(2, 0);
+        expect(harness.context.lineTo).toHaveBeenCalledTimes(2);
+    });
+
+    it('updates shapes by id', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
