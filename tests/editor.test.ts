@@ -127,3 +127,46 @@ describe('image loading', () => {
             harness.editor.load({ height: 0, width: 0 } as CanvasImageSource)
         ).rejects.toBeInstanceOf(InvalidImageError);
     });
+});
+
+describe('adjustments', () => {
+    it('renders brightness and contrast filters', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.setAdjustments({ brightness: 1.5, contrast: 0.8 });
+
+        expect(harness.context.drawFilters.at(-1)).toContain('brightness(1.5)');
+        expect(harness.context.drawFilters.at(-1)).toContain('contrast(0.8)');
+    });
+
+    it('renders blur, grayscale, and saturation filters', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.setAdjustments({ blur: 4, grayscale: 0.65, saturation: 1.75 });
+
+        expect(harness.context.drawFilters.at(-1)).toContain('blur(4px)');
+        expect(harness.context.drawFilters.at(-1)).toContain('grayscale(0.65)');
+        expect(harness.context.drawFilters.at(-1)).toContain('saturate(1.75)');
+    });
+
+    it('applies a color overlay', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.setAdjustments({ overlayColor: '#ef4444', overlayOpacity: 0.45 });
+
+        expect(harness.context.fillStyle).toBe('#ef4444');
+        expect(harness.context.fillRect).toHaveBeenCalledWith(0, 0, 4, 3);
+    });
+
+    it('applies sharpening to pixel data', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.setAdjustment('sharpen', 0.4);
+
+        expect(harness.context.getImageData).toHaveBeenCalledWith(0, 0, 4, 3);
+        expect(harness.context.putImageData).toHaveBeenCalled();
+    });
