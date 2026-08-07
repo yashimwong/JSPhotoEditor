@@ -384,3 +384,46 @@ describe('history', () => {
     });
 
     it('restores shapes through history', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        harness.editor.addShape({
+            color: '#111827',
+            opacity: 1,
+            radius: 1,
+            type: 'circle',
+            x: 1,
+            y: 1
+        });
+        harness.editor.removeLastShape();
+
+        harness.editor.undo();
+
+        expect(harness.editor.shapeCount).toBe(1);
+    });
+
+    it('clears redo history after a new change', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        harness.editor.setAdjustment('brightness', 1.4);
+        harness.editor.undo();
+        harness.editor.setAdjustment('contrast', 1.2);
+        expect(harness.editor.canRedo).toBe(false);
+    });
+
+    it('honors the configured history limit', async () => {
+        const harness = createHarness({ historyLimit: 2 });
+        await loadHarness(harness);
+        harness.editor.setAdjustment('brightness', 1.1);
+        harness.editor.setAdjustment('brightness', 1.2);
+        harness.editor.setAdjustment('brightness', 1.3);
+
+        expect(harness.editor.undo()).toBe(true);
+        expect(harness.editor.undo()).toBe(true);
+        expect(harness.editor.undo()).toBe(false);
+        expect(harness.editor.state.adjustments.brightness).toBe(1.1);
+    });
+});
+
+describe('export', () => {
+    it('exports lossless PNG data', async () => {
+        const harness = createHarness();
