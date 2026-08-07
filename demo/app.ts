@@ -27,3 +27,32 @@ const listen = <EventName extends keyof HTMLElementEventMap>(
     target?.addEventListener(eventName, listener as EventListener);
 };
 const numberValue = (control: HTMLInputElement | null, fallback = 0): number => {
+    const value = Number(control?.value);
+    return Number.isFinite(value) ? value : fallback;
+};
+
+const controls = {
+    blurRadius: element<HTMLInputElement>('blur_radius'),
+    blurStrength: element<HTMLInputElement>('blur_strength'),
+    color: element<HTMLInputElement>('color_picker'),
+    colorOpacity: element<HTMLInputElement>('color_opacity'),
+    contrast: element<HTMLInputElement>('contrast'),
+    exposure: element<HTMLInputElement>('exposure'),
+    grayscale: element<HTMLInputElement>('grayscale'),
+    saturation: element<HTMLInputElement>('saturation'),
+    sharpen: element<HTMLInputElement>('sharpen_strength')
+};
+const imageInput = element<HTMLInputElement>('load_image');
+const undoButton = element<HTMLButtonElement>('undo');
+const redoButton = element<HTMLButtonElement>('redo');
+const saveModal = element<HTMLElement>('save_image_modal');
+const formatControl = element<HTMLSelectElement>('image_format');
+const qualityControl = element<HTMLInputElement>('image_compression');
+const qualityLabel = element<HTMLElement>('image_compression_label');
+const shapeColor = element<HTMLInputElement>('shape_color');
+const shapeOpacity = element<HTMLInputElement>('shape_opacity');
+const shapeSize = element<HTMLInputElement>('shape_size');
+const removeShapeButton = element<HTMLButtonElement>('remove_last_shape');
+const shapeTools = [
+    element<HTMLElement>('circle_tool'),
+    element<HTMLElement>('rectangle_tool'),
