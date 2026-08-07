@@ -470,3 +470,45 @@ describe('lifecycle', () => {
 
         harness.editor.reset();
 
+        expect(harness.editor.hasImage()).toBe(true);
+        expect(harness.editor.state.adjustments.brightness).toBe(1);
+        expect(harness.editor.canUndo).toBe(true);
+    });
+
+    it('clears image state and canvas dimensions', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        const cleared = vi.fn();
+        harness.editor.on('clear', cleared);
+
+        harness.editor.clear();
+
+        expect(harness.editor.hasImage()).toBe(false);
+        expect(harness.canvas.width).toBe(0);
+        expect(harness.canvas.height).toBe(0);
+        expect(cleared).toHaveBeenCalledOnce();
+    });
+
+    it('unsubscribes event listeners', async () => {
+        const harness = createHarness();
+        const listener = vi.fn();
+        const unsubscribe = harness.editor.on('change', listener);
+        unsubscribe();
+        await loadHarness(harness);
+        expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('rejects editing operations without an image', () => {
+        const harness = createHarness();
+        expect(() => harness.editor.rotateRight()).toThrow(MissingImageError);
+        expect(() => harness.editor.toDataURL()).toThrow(MissingImageError);
+    });
+
+    it('prevents use after disposal', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        harness.editor.dispose();
+        expect(() => harness.editor.render()).toThrow(EditorDisposedError);
+        expect(() => harness.editor.on('change', vi.fn())).toThrow(EditorDisposedError);
+    });
+});
