@@ -427,3 +427,46 @@ describe('history', () => {
 describe('export', () => {
     it('exports lossless PNG data', async () => {
         const harness = createHarness();
+        await loadHarness(harness);
+
+        expect(harness.editor.toDataURL()).toBe('data:image/mock;base64,image');
+        expect(harness.toDataURL).toHaveBeenCalledWith('image/png');
+    });
+
+    it('exports lossy data with fractional quality', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        harness.editor.toDataURL({ format: 'jpeg', quality: 0.7 });
+
+        expect(harness.toDataURL).toHaveBeenCalledWith('image/jpeg', 0.7);
+    });
+
+    it('exports blobs', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+
+        const blob = await harness.editor.toBlob({ format: 'webp', quality: 0.8 });
+
+        expect(blob.type).toBe('image/webp');
+        expect(harness.toBlob).toHaveBeenCalledWith(expect.any(Function), 'image/webp', 0.8);
+    });
+
+    it('downloads with a derived filename', async () => {
+        const harness = createHarness();
+        await loadHarness(harness, 'holiday.jpeg');
+        const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+        expect(harness.editor.download({ format: 'webp' })).toBe('holiday_jsphotoeditor.webp');
+        expect(click).toHaveBeenCalled();
+    });
+});
+
+describe('lifecycle', () => {
+    it('resets edits without unloading the image', async () => {
+        const harness = createHarness();
+        await loadHarness(harness);
+        harness.editor.setAdjustment('brightness', 1.4);
+
+        harness.editor.reset();
+
