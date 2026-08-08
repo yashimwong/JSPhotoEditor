@@ -143,3 +143,32 @@ function addShape(event: MouseEvent): void {
         color: shapeColor?.value || '#111827',
         opacity: Math.min(1, Math.max(0, numberValue(shapeOpacity, 100) / 100)),
         x: point.x,
+        y: point.y
+    };
+
+    if (activeShape === 'circle') {
+        editor.addShape({ ...base, radius: 30 * scale * size, type: 'circle' });
+    } else {
+        editor.addShape({
+            ...base,
+            height: (activeShape === 'rectangle' ? 30 : 100) * scaleY * size,
+            type: activeShape,
+            width: 100 * scaleX * size
+        });
+    }
+}
+
+function updateBlur(): void {
+    if (!editor.hasImage()) {
+        return;
+    }
+
+    editor.setAdjustment(
+        'blur',
+        numberValue(controls.blurRadius) * (numberValue(controls.blurStrength) / 100)
+    );
+}
+
+function setAdjustment<Name extends keyof Adjustments>(
+    name: Name,
+    value: () => Adjustments[Name]
