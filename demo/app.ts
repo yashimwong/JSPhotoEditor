@@ -114,3 +114,32 @@ function toggleShape(tool: HTMLElement): void {
 
     if (shape !== 'circle' && shape !== 'rectangle' && shape !== 'triangle') {
         return;
+    }
+
+    const shouldDeactivate = activeShape === shape;
+    deactivateShapes();
+
+    if (!shouldDeactivate) {
+        activeShape = shape;
+        tool.classList.add('activated');
+    }
+}
+
+function addShape(event: MouseEvent): void {
+    if (!activeShape || !editor.hasImage()) {
+        return;
+    }
+
+    const rectangle = canvas.getBoundingClientRect();
+    const scaleX = rectangle.width ? canvas.width / rectangle.width : 1;
+    const scaleY = rectangle.height ? canvas.height / rectangle.height : 1;
+    const point = editor.toImagePoint({
+        x: (event.clientX - rectangle.left) * scaleX,
+        y: (event.clientY - rectangle.top) * scaleY
+    });
+    const scale = (scaleX + scaleY) / 2;
+    const size = Math.min(2, Math.max(0.1, numberValue(shapeSize, 100) / 100));
+    const base = {
+        color: shapeColor?.value || '#111827',
+        opacity: Math.min(1, Math.max(0, numberValue(shapeOpacity, 100) / 100)),
+        x: point.x,
