@@ -201,3 +201,32 @@ listen(imageInput, 'change', () => {
     }
 
     void editor.load(file).catch(error => {
+        imageInput.value = '';
+        imageInput.setCustomValidity(error instanceof Error ? error.message : 'Image load failed');
+        imageInput.reportValidity();
+    });
+});
+listen(element('rotate_left'), 'click', () => editor.hasImage() && editor.rotateLeft());
+listen(element('rotate_right'), 'click', () => editor.hasImage() && editor.rotateRight());
+listen(element('flip_horizontal'), 'click', () => editor.hasImage() && editor.flipHorizontal());
+listen(element('flip_vertical'), 'click', () => editor.hasImage() && editor.flipVertical());
+listen(undoButton, 'click', () => editor.hasImage() && editor.undo());
+listen(redoButton, 'click', () => editor.hasImage() && editor.redo());
+listen(
+    controls.exposure,
+    'input',
+    setAdjustment('brightness', () => Math.max(0, 1 + numberValue(controls.exposure) / 100))
+);
+listen(
+    controls.contrast,
+    'input',
+    setAdjustment('contrast', () => Math.max(0, 1 + numberValue(controls.contrast) / 100))
+);
+listen(controls.blurRadius, 'input', updateBlur);
+listen(controls.blurStrength, 'input', updateBlur);
+listen(
+    controls.sharpen,
+    'input',
+    setAdjustment('sharpen', () => numberValue(controls.sharpen) / 100)
+);
+listen(
