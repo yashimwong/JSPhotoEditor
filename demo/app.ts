@@ -56,3 +56,32 @@ const removeShapeButton = element<HTMLButtonElement>('remove_last_shape');
 const shapeTools = [
     element<HTMLElement>('circle_tool'),
     element<HTMLElement>('rectangle_tool'),
+    element<HTMLElement>('triangle_tool')
+].filter((tool): tool is HTMLElement => Boolean(tool));
+let activeShape: ShapeType | undefined;
+
+function updateHistoryButtons(): void {
+    if (undoButton) {
+        undoButton.disabled = !editor.hasImage() || !editor.canUndo;
+    }
+
+    if (redoButton) {
+        redoButton.disabled = !editor.hasImage() || !editor.canRedo;
+    }
+}
+
+function updateShapeButton(): void {
+    if (removeShapeButton) {
+        removeShapeButton.disabled = editor.shapeCount === 0;
+    }
+}
+
+function updateAdjustmentControls(state: EditorState): void {
+    const { adjustments } = state;
+    const assignments: Array<[HTMLInputElement | null, number | string]> = [
+        [controls.exposure, (adjustments.brightness - 1) * 100],
+        [controls.contrast, (adjustments.contrast - 1) * 100],
+        [controls.sharpen, adjustments.sharpen * 100],
+        [controls.grayscale, adjustments.grayscale * 100],
+        [controls.saturation, adjustments.saturation * 100],
+        [controls.color, adjustments.overlayColor],
