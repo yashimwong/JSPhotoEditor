@@ -85,3 +85,32 @@ function updateAdjustmentControls(state: EditorState): void {
         [controls.grayscale, adjustments.grayscale * 100],
         [controls.saturation, adjustments.saturation * 100],
         [controls.color, adjustments.overlayColor],
+        [controls.colorOpacity, adjustments.overlayOpacity * 100]
+    ];
+
+    for (const [control, value] of assignments) {
+        if (control) {
+            control.value = String(value);
+        }
+    }
+
+    if (controls.blurRadius && controls.blurStrength) {
+        const radius = numberValue(controls.blurRadius);
+        controls.blurStrength.value = radius === 0 ? '0' : String((adjustments.blur / radius) * 100);
+    }
+}
+
+function deactivateShapes(): void {
+    activeShape = undefined;
+    shapeTools.forEach(tool => tool.classList.remove('activated'));
+}
+
+function toggleShape(tool: HTMLElement): void {
+    if (!editor.hasImage()) {
+        return;
+    }
+
+    const shape = tool.dataset.shape;
+
+    if (shape !== 'circle' && shape !== 'rectangle' && shape !== 'triangle') {
+        return;
