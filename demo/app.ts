@@ -172,3 +172,32 @@ function updateBlur(): void {
 function setAdjustment<Name extends keyof Adjustments>(
     name: Name,
     value: () => Adjustments[Name]
+): () => void {
+    return () => {
+        if (editor.hasImage()) {
+            editor.setAdjustment(name, value());
+        }
+    };
+}
+
+function closeModal(): void {
+    if (saveModal) {
+        saveModal.style.display = 'none';
+    }
+}
+
+function updateQualityVisibility(): void {
+    if (qualityLabel && formatControl) {
+        qualityLabel.style.display =
+            formatControl.value === 'jpeg' || formatControl.value === 'webp' ? '' : 'none';
+    }
+}
+
+listen(imageInput, 'change', () => {
+    const file = imageInput?.files?.[0];
+
+    if (!file || !file.type.startsWith('image/')) {
+        return;
+    }
+
+    void editor.load(file).catch(error => {
