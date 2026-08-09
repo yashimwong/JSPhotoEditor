@@ -317,3 +317,31 @@ document.addEventListener('keydown', event => {
     } else if (
         editor.hasImage() &&
         !editingControl &&
+        (event.key === 'Delete' || event.key === 'Backspace')
+    ) {
+        handled = editor.removeLastShape();
+    }
+
+    if (handled) {
+        event.preventDefault();
+    }
+});
+editor.on('change', ({ state }) => {
+    updateAdjustmentControls(state);
+    updateHistoryButtons();
+});
+editor.on('shapeschange', updateShapeButton);
+editor.on('clear', () => {
+    deactivateShapes();
+    closeModal();
+
+    for (const control of [shapeColor, shapeOpacity, shapeSize]) {
+        if (control) {
+            control.value = control.defaultValue;
+        }
+    }
+});
+window.addEventListener('beforeunload', () => editor.dispose());
+updateHistoryButtons();
+updateShapeButton();
+updateQualityVisibility();
