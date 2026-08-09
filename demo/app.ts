@@ -288,3 +288,32 @@ listen(formatControl, 'change', updateQualityVisibility);
 listen(saveModal, 'click', event => {
     if (event.target === saveModal) {
         closeModal();
+    }
+});
+shapeTools.forEach(tool => listen(tool, 'click', () => toggleShape(tool)));
+listen(canvas, 'click', event => addShape(event as MouseEvent));
+listen(removeShapeButton, 'click', () => {
+    if (editor.hasImage()) {
+        editor.removeLastShape();
+    }
+});
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        closeModal();
+        deactivateShapes();
+    }
+
+    const editingControl =
+        event.target instanceof HTMLElement &&
+        ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName);
+    const command = event.ctrlKey || event.metaKey;
+    const key = event.key.toLowerCase();
+    let handled = false;
+
+    if (editor.hasImage() && command && key === 'z') {
+        handled = event.shiftKey ? editor.redo() : editor.undo();
+    } else if (editor.hasImage() && event.ctrlKey && key === 'y') {
+        handled = editor.redo();
+    } else if (
+        editor.hasImage() &&
+        !editingControl &&
