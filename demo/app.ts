@@ -259,3 +259,32 @@ listen(element('new_image'), 'click', () => {
 });
 listen(element('exposure-slider-cta'), 'click', () => {
     element('contrast-slider')?.classList.add('hidden');
+    element('exposure-slider')?.classList.toggle('hidden');
+});
+listen(element('contrast-slider-cta'), 'click', () => {
+    element('exposure-slider')?.classList.add('hidden');
+    element('contrast-slider')?.classList.toggle('hidden');
+});
+listen(element('open_save_dialogue'), 'click', () => {
+    if (editor.hasImage() && saveModal) {
+        saveModal.style.display = 'block';
+    }
+});
+listen(element('modal_close_btn'), 'click', closeModal);
+listen(element('modal_cancel_btn'), 'click', closeModal);
+listen(element('modal_save_btn'), 'click', () => {
+    if (!editor.hasImage()) {
+        return;
+    }
+
+    const format = formatControl?.value;
+    editor.download({
+        format: format === 'jpeg' || format === 'webp' ? format : 'png',
+        quality: numberValue(qualityControl, 1)
+    });
+    closeModal();
+});
+listen(formatControl, 'change', updateQualityVisibility);
+listen(saveModal, 'click', event => {
+    if (event.target === saveModal) {
+        closeModal();
