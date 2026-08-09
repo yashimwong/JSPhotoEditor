@@ -230,3 +230,32 @@ listen(
     setAdjustment('sharpen', () => numberValue(controls.sharpen) / 100)
 );
 listen(
+    controls.grayscale,
+    'input',
+    setAdjustment('grayscale', () => numberValue(controls.grayscale) / 100)
+);
+listen(
+    controls.saturation,
+    'input',
+    setAdjustment('saturation', () => numberValue(controls.saturation, 100) / 100)
+);
+listen(
+    controls.color,
+    'input',
+    setAdjustment('overlayColor', () => controls.color?.value || '#ffffff')
+);
+listen(
+    controls.colorOpacity,
+    'input',
+    setAdjustment('overlayOpacity', () => numberValue(controls.colorOpacity) / 100)
+);
+listen(element('clear_all'), 'click', () => editor.hasImage() && editor.reset());
+listen(element('new_image'), 'click', () => {
+    editor.clear();
+
+    if (imageInput) {
+        imageInput.value = '';
+    }
+});
+listen(element('exposure-slider-cta'), 'click', () => {
+    element('contrast-slider')?.classList.add('hidden');
